@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="playGradient" x1="0" y1="32" x2="64" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#22d3ee" />
+      <stop offset="0.53" stop-color="#7c3aed" />
+      <stop offset="0.95" stop-color="#d946ef" />
+      <stop offset="1" stop-color="#ff4f8b" />
+    </linearGradient>
+  </defs>
+
+  <path
+    fill="url(#playGradient)"
+    fill-rule="evenodd"
+    d="M32 0
+       A32 32 0 1 1 32 64
+       A32 32 0 1 1 32 0
+       M38 12.299
+       L49 31.351
+       L27 31.351
+       Z"
+  />
+</svg>
