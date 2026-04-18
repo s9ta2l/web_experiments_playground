@@ -59,7 +59,7 @@ The workflow lives at `.github/workflows/deploy.yml` and builds the Vite app bef
 For a project site, the default published URL will be:
 
 ```txt
-https://<your-user>.github.io/web_experiments_playground/
+https://s9ta2l.github.io/web_experiments_playground/
 ```
 
 If your repository name changes, update `package.json` or set `BASE_PATH` during the build so the deployed asset paths still match the repo slug.

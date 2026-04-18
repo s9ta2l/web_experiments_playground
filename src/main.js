@@ -10,6 +10,7 @@ const activeExperiment = requestedExperimentId
   ? experimentsById[requestedExperimentId] || null
   : null;
 const basePath = normalizeBasePath(import.meta.env.BASE_URL);
+const githubRepoHref = "https://github.com/s9ta2l/web_experiments_playground";
 const portfolioHref = "https://www.instagram.com/alexev_studio/";
 
 render();
@@ -311,7 +312,7 @@ function renderFooter(aboutActive) {
         </p>
         <a
           class="footer-link"
-          href="${createGitHubHref()}"
+          href="${githubRepoHref}"
           target="_blank"
           rel="noreferrer"
         >
@@ -405,18 +406,6 @@ function createExperimentHref(experimentId) {
 
 function createAssetHref(assetPath) {
   return `${basePath}${assetPath.replace(/^\/+/, "")}`;
-}
-
-function createGitHubHref() {
-  const repoName = basePath.replaceAll("/", "");
-  const host = window.location.hostname;
-
-  if (host.endsWith(".github.io") && repoName) {
-    const owner = host.replace(/\.github\.io$/, "");
-    return `https://github.com/${owner}/${repoName}`;
-  }
-
-  return `https://github.com/search?q=${encodeURIComponent(repoName)}&type=repositories`;
 }
 
 function formatAuthors(authors) {
