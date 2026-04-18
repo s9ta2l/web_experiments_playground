@@ -60,12 +60,14 @@ function renderShowroomView(invalidExperimentId) {
           }
           <h1>Open the showroom, remix an idea, add your own page.</h1>
           <p class="hero-copy">
-            This gallery hosts p5.js browser experiments designed to be explored by visitors and extended by friends.
+            This gallery hosts p5.js browser experiments designed to be explored by visitors and extended by friends. Click any experiment below to open it.
           </p>
         </section>
 
-        <section class="experiments-index" aria-label="Experiment list">
+        <section class="showroom-section">
+          <div class="experiments-grid" aria-label="Experiment list">
           ${experiments.map(renderExperimentLink).join("")}
+          </div>
         </section>
       </main>
 
@@ -276,10 +278,17 @@ function renderExperimentsDirectory(activeExperimentId = null) {
 }
 
 function renderExperimentLink(experiment) {
+  const cardTags = [experiment.mode, ...(experiment.themes || []).slice(0, 2)];
+
   return `
-    <a class="experiment-line" href="${createExperimentHref(experiment.id)}">
-      <span class="experiment-line-title">${escapeHtml(experiment.title)}</span>
-      <span class="experiment-line-copy">${escapeHtml(experiment.description)}</span>
+    <a class="experiment-card" href="${createExperimentHref(experiment.id)}">
+      <h3 class="experiment-card-title">${escapeHtml(experiment.title)}</h3>
+      <p class="experiment-card-copy">${escapeHtml(experiment.description)}</p>
+      <div class="experiment-card-tags" aria-label="Experiment tags">
+        ${cardTags
+          .map((tag) => `<span class="experiment-tag">${escapeHtml(tag)}</span>`)
+          .join("")}
+      </div>
     </a>
   `;
 }

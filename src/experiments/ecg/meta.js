@@ -7,7 +7,8 @@ export const meta = {
   description: "A scrolling heartbeat trace over an ECG-style grid with keyboard controls for speed and scale.",
   authors: [],
   status: "Open for collaboration",
-  tags: ["signal", "simulation", "data"],
+  mode: "interactive",
+  themes: ["signal", "data"],
   controls: [
     "Up and Down arrows change the waveform scale.",
     "Left and Right arrows change playback speed.",

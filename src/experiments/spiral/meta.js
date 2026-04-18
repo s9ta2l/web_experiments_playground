@@ -7,7 +7,8 @@ export const meta = {
   description: "An Archimedean spiral study with controls for turn count, spacing, spin, orbit offset, and trails.",
   authors: [],
   status: "Open for collaboration",
-  tags: ["geometry", "orbit", "interactive"],
+  mode: "interactive",
+  themes: ["geometry", "orbit"],
   controls: [
     "Use the control panel to adjust spacing, turns, angular speed, orbit radius, and offsets.",
     "Toggle trails or pause the animation from the panel.",

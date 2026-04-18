@@ -7,7 +7,8 @@ export const meta = {
   description: "One sentence explaining what visitors will see or do.",
   authors: ["Your Name"],
   status: "Open for collaboration",
-  tags: ["tag-one", "tag-two"],
+  mode: "interactive",
+  themes: ["theme-one", "theme-two"],
   controls: [
     "Add short control instructions here.",
   ],

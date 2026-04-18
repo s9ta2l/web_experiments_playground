@@ -7,7 +7,8 @@ export const meta = {
   description: "A constraint-based triple pendulum that starts from a random push and settles into chaotic motion.",
   authors: [],
   status: "Open for collaboration",
-  tags: ["physics", "chaos", "motion"],
+  mode: "interactive",
+  themes: ["physics", "chaos"],
   controls: [
     "Use the Start / Random push button to reset the pendulum with a new kick.",
   ],

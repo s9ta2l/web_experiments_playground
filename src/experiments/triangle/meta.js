@@ -7,7 +7,8 @@ export const meta = {
   description: "A rotating outline triangle bouncing across the viewport with two simple live controls.",
   authors: [],
   status: "Open for collaboration",
-  tags: ["motion", "geometry", "starter"],
+  mode: "interactive",
+  themes: ["geometry", "motion"],
   controls: [
     "Use the Size slider to change the triangle radius.",
     "Use the Speed slider to change how quickly it crosses the screen.",
