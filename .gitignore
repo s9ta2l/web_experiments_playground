@@ -23,3 +23,9 @@ AGENTS.md
 *.njsproj
 *.sln
 *.sw?
+
+# Claude Code & agent workflows — each contributor uses their own
+.claude/
+
+# FreeRide — contains auth tokens
+.mcp.json
