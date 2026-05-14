@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" fill="none" stroke-width="1.5">
+  <rect width="360" height="120" fill="#f6efe4"/>
+  <g stroke="#101010">
+    <!-- X panel cube -->
+    <g transform="translate(60 60)">
+      <line x1="-44" y1="0" x2="44" y2="0" stroke="#dc2626" stroke-width="2"/>
+      <path d="M-22 -22 L22 -22 L22 22 L-22 22 Z"/>
+      <path d="M-22 -22 L-10 -32 L34 -32 L22 -22"/>
+      <path d="M22 22 L34 12 L34 -32"/>
+    </g>
+    <!-- Y panel cube -->
+    <g transform="translate(180 60)">
+      <line x1="0" y1="-44" x2="0" y2="44" stroke="#16a34a" stroke-width="2"/>
+      <path d="M-22 -22 L22 -22 L22 22 L-22 22 Z"/>
+      <path d="M-22 -22 L-10 -32 L34 -32 L22 -22"/>
+      <path d="M22 22 L34 12 L34 -32"/>
+    </g>
+    <!-- Z panel cube -->
+    <g transform="translate(300 60)">
+      <line x1="-30" y1="30" x2="30" y2="-30" stroke="#2563eb" stroke-width="2"/>
+      <path d="M-22 -22 L22 -22 L22 22 L-22 22 Z"/>
+      <path d="M-22 -22 L-10 -32 L34 -32 L22 -22"/>
+      <path d="M22 22 L34 12 L34 -32"/>
+    </g>
+  </g>
+</svg>

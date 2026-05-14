@@ -8,6 +8,8 @@ import { meta as pendulumMeta } from "./pendulum/meta.js";
 import { startChaosPendulumExperiment } from "./pendulum/Experiment.js";
 import { meta as spiralMeta } from "./spiral/meta.js";
 import { startSpiralOrbitExperiment } from "./spiral/Experiment.js";
+import { meta as rotationsMeta } from "./rotations/meta.js";
+import { startRotationsExperiment } from "./rotations/Experiment.js";
 
 function defineExperiment(meta, start) {
   return {
@@ -22,6 +24,7 @@ export const experiments = [
   defineExperiment(linesMeta, startLineSpectrumExperiment),
   defineExperiment(pendulumMeta, startChaosPendulumExperiment),
   defineExperiment(spiralMeta, startSpiralOrbitExperiment),
+  defineExperiment(rotationsMeta, startRotationsExperiment),
 ];
 
 export const experimentsById = Object.fromEntries(
