@@ -32,6 +32,7 @@ export function startLineSpectrumExperiment({
       });
       gridControl.slider.input(() => {
         gridCount = Number(gridControl.slider.value());
+        p.redraw();
       });
 
       const bendControl = addSliderControl(p, panel, {
@@ -44,6 +45,7 @@ export function startLineSpectrumExperiment({
       });
       bendControl.slider.input(() => {
         bendMax = Number(bendControl.slider.value());
+        p.redraw();
       });
 
       const segmentControl = addSliderControl(p, panel, {
@@ -55,6 +57,7 @@ export function startLineSpectrumExperiment({
       });
       segmentControl.slider.input(() => {
         segments = Number(segmentControl.slider.value());
+        p.redraw();
       });
 
       const gapControl = addSliderControl(p, panel, {
@@ -67,6 +70,7 @@ export function startLineSpectrumExperiment({
       });
       gapControl.slider.input(() => {
         gap = Number(gapControl.slider.value());
+        p.redraw();
       });
 
       const padControl = addSliderControl(p, panel, {
@@ -78,7 +82,11 @@ export function startLineSpectrumExperiment({
       });
       padControl.slider.input(() => {
         pad = Number(padControl.slider.value());
+        p.redraw();
       });
+
+      // Static study: render once, then only when a control or viewport changes.
+      p.noLoop();
     };
 
     p.draw = () => {

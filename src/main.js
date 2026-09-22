@@ -283,6 +283,7 @@ function renderExperimentLink(experiment) {
 
   return `
     <a class="experiment-card" href="${createExperimentHref(experiment.id)}">
+      <img class="experiment-card-preview" src="${experiment.previewUrl}" alt="" loading="lazy" />
       <h3 class="experiment-card-title">${escapeHtml(experiment.title)}</h3>
       <p class="experiment-card-copy">${escapeHtml(experiment.description)}</p>
       <div class="experiment-card-tags" aria-label="Experiment tags">

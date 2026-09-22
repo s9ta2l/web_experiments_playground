@@ -6,7 +6,10 @@ A static field study where each column bends a little more than the previous one
 
 ## Controls
 
-- No live controls yet.
+- Grid density changes the number of lines.
+- Bend changes how far each line curves.
+- Use Segments to adjust curve smoothness.
+- Gap and Padding adjust spacing around the lines.
 
 ## Collaboration notes
 
