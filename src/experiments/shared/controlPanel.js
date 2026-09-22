@@ -38,7 +38,8 @@ export function addSliderControl(
     valueEl.html(format(slider.value()));
   };
 
-  slider.input(sync);
+  // p5's .input() replaces an earlier handler; keep this display listener independent.
+  slider.elt.addEventListener("input", sync);
   sync();
 
   return { field, slider, valueEl, sync };
