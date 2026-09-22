@@ -4,6 +4,7 @@ import { meta as linesMeta } from "./lines/meta.js";
 import { meta as pendulumMeta } from "./pendulum/meta.js";
 import { meta as spiralMeta } from "./spiral/meta.js";
 import { meta as rotationsMeta } from "./rotations/meta.js";
+import { meta as artCodeWakeMeta } from "./art-code-wake/meta.js";
 
 function defineExperiment(meta, load) {
   return {
@@ -30,6 +31,9 @@ export const experiments = [
   ),
   defineExperiment(rotationsMeta, () =>
     import("./rotations/Experiment.js").then(({ startRotationsExperiment }) => startRotationsExperiment)
+  ),
+  defineExperiment(artCodeWakeMeta, () =>
+    import("./art-code-wake/Experiment.js").then(({ startArtCodeWakeExperiment }) => startArtCodeWakeExperiment)
   ),
 ];
 

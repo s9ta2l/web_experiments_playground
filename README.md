@@ -78,6 +78,7 @@ Current experiment ids:
 - `pendulum`
 - `spiral`
 - `rotations`
+- `art-code-wake`
 
 ## Project structure
 
