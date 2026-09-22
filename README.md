@@ -77,6 +77,7 @@ Current experiment ids:
 - `lines`
 - `pendulum`
 - `spiral`
+- `rotations`
 
 ## Project structure
 

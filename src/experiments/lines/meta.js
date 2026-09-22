@@ -10,8 +10,10 @@ export const meta = {
   mode: "static",
   themes: ["pattern", "field"],
   controls: [
-    "This experiment has no direct controls yet.",
-    "Good candidate for adding spacing, bend, or palette controls.",
+    "Use Grid density to change the number of lines.",
+    "Use Bend to change how far each line curves.",
+    "Use Segments to adjust curve smoothness.",
+    "Use Gap and Padding to adjust spacing around the lines.",
   ],
   previewUrl,
   readme,
