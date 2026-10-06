@@ -5,6 +5,7 @@ import { meta as pendulumMeta } from "./pendulum/meta.js";
 import { meta as spiralMeta } from "./spiral/meta.js";
 import { meta as rotationsMeta } from "./rotations/meta.js";
 import { meta as artCodeWakeMeta } from "./art-code-wake/meta.js";
+import { meta as kaleidoscopeMeta } from "./kaleidoscope/meta.js";
 
 function defineExperiment(meta, load) {
   return {
@@ -34,6 +35,9 @@ export const experiments = [
   ),
   defineExperiment(artCodeWakeMeta, () =>
     import("./art-code-wake/Experiment.js").then(({ startArtCodeWakeExperiment }) => startArtCodeWakeExperiment)
+  ),
+  defineExperiment(kaleidoscopeMeta, () =>
+    import("./kaleidoscope/Experiment.js").then(({ startKaleidoscopeExperiment }) => startKaleidoscopeExperiment)
   ),
 ];
 

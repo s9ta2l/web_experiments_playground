@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" fill="none">
+  <defs>
+    <linearGradient id="glass" x1="0" y1="0" x2="130" y2="150" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9adbc5"/>
+      <stop offset=".48" stop-color="#238b88"/>
+      <stop offset="1" stop-color="#164b5c"/>
+    </linearGradient>
+    <pattern id="mirrors" width="208" height="180" patternUnits="userSpaceOnUse">
+      <path fill="#123448" d="M0 0h208v180H0z"/>
+      <path fill="url(#glass)" d="M0 0h104L52 90zm104 0h104l-52 90zM52 90h104l-52 90z"/>
+      <path fill="#e9b05e" d="m52 90 20-35 12 22-32 13zm104 0-20-35-12 22 32 13zm-52 90-20-35 24 1-4 34z"/>
+      <path fill="#e18372" d="m0 0 35 12-15 16L0 0zm104 0-35 12 15 16 20-28zm104 0-35 12 15 16 20-28z"/>
+      <path stroke="#b9e1c9" stroke-width="3" d="m12 8 29 45 11 37 11-37 29-45m24 0 29 45 11 37 11-37 29-45M64 98l29 45 11 37 11-37 29-45"/>
+      <path fill="#8dcdb3" d="m0 180 52-90 52 90-52-17zm104 0 52-90 52 90-52-17z" opacity=".45"/>
+    </pattern>
+  </defs>
+  <path fill="url(#mirrors)" d="M0 0h640v400H0z"/>
+  <path fill="#071019" fill-opacity=".18" d="M0 0h640v400H0z"/>
+</svg>

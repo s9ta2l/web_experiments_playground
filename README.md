@@ -79,6 +79,7 @@ Current experiment ids:
 - `spiral`
 - `rotations`
 - `art-code-wake`
+- `kaleidoscope` (live camera; use HTTPS on phones)
 
 ## Project structure
 
