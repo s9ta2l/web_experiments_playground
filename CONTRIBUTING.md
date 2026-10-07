@@ -75,6 +75,12 @@ To verify, Tab around a page with the menu closed: no offscreen menu controls sh
 
 The menu button shows three vertically stacked bars when closed and a centered cross when open. Check both states on desktop and phone widths, including with a larger browser font size.
 
+## Experiment Notes
+
+Notes render the README's headings (levels 1–3), paragraphs, bullet and numbered lists, bold text, inline code, fenced code, and inline links. Web, mail, and relative links are supported; raw HTML is shown as text. This is a small renderer for these features rather than a full Markdown implementation.
+
+To verify, open Camera Kaleidoscope's menu and expand Notes. Pattern names should be bold, verification steps should be a ten-item numbered list, reference links should be underlined and reachable with Tab, and code should stay literal. Run `npm test` for the Markdown renderer checks.
+
 ## Naming conventions
 
 - `id`: stable URL slug, lower camel case or short kebab-style equivalent already used by the project.

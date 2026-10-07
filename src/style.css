@@ -315,7 +315,8 @@ body[data-menu-state="open"] .site-drawer {
 .drawer-experiment-copy,
 .markdown-body,
 .markdown-body p,
-.markdown-body ul {
+.markdown-body ul,
+.markdown-body ol {
   color: var(--drawer-soft);
 }
 
@@ -746,12 +747,21 @@ body[data-menu-state="open"] .site-drawer {
 }
 
 .markdown-body p,
-.markdown-body ul {
+.markdown-body ul,
+.markdown-body ol {
   margin: 0.45rem 0;
 }
 
-.markdown-body ul {
+.markdown-body ul,
+.markdown-body ol {
   padding-left: 1.15rem;
+}
+
+.markdown-body a {
+  color: var(--drawer-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  overflow-wrap: anywhere;
 }
 
 .markdown-body h2,
