@@ -40,6 +40,10 @@ src/experiments/index.js
 
 That registry powers the showroom cards, experiment navigation, descriptions, credits, and readme support.
 
+Direct links accept only registered IDs. To verify the fallback, open `/?experiment=constructor`, `/?experiment=__proto__`, or an unknown ID: each should show the showroom and a not-registered message. The legacy `?sketch=<id>` links follow the same rule.
+
+Experiment runtimes receive `mountId` for the drawing stage, `controlsMountId` for controls, and `contentMountId` for readable overlays. Put text such as matrix values in the content mount so it remains available to assistive technology. The drawing stage is decorative by default; experiments with an interactive canvas, such as Kaleidoscope, explicitly expose it.
+
 ## Add a new experiment
 
 1. Copy `src/experiments/_template/` into a new folder named after your experiment id.
@@ -54,6 +58,28 @@ That registry powers the showroom cards, experiment navigation, descriptions, cr
 - Keep the experiment focused on one strong idea.
 - If you change controls or behavior, update both `meta.js` and the experiment `README.md`.
 - If the preview is no longer representative, update `preview.svg`.
+
+## Shared experiment controls
+
+Use the helpers in [controlPanel.js](./src/experiments/shared/controlPanel.js) for experiment panels. `addButton` handles native click activation from mouse, touch, Enter, and Space.
+
+`addSliderControl` connects a native label to each slider with a unique ID. Screen readers announce the visible caption along with the range value. To verify, click a slider caption: that slider should receive focus. Its arrow keys should adjust its value normally. Inspect the browser accessibility tree or use a screen reader to check that every slider has its caption as its name.
+
+To verify buttons, open Rotations and Tab to Pause. Enter should change its label to Play and stop the cubes; Space should resume them. Pause again, Tab to Reset, and activate it to return all three matrices to the identity. Check Clear, Randomize BPM, and Start in their experiments with both keys, then check mouse clicks and phone taps.
+
+## Menu accessibility
+
+The menu is a modal dialog. Opening it moves focus to Close and makes the background inert. Tab and Shift+Tab cycle through the visible drawer controls, including expanded Notes. Escape, Close, and the backdrop return focus to the menu button; the closed drawer is inert and fully hidden.
+
+To verify, Tab around a page with the menu closed: no offscreen menu controls should receive focus. Open the menu with Enter, cycle forward and backward through it, then press Escape. Focus should return to Open menu, and the page controls should work again. Repeat on the showroom, About, and an experiment page, and check both Close and backdrop clicks.
+
+The menu button shows three vertically stacked bars when closed and a centered cross when open. Check both states on desktop and phone widths, including with a larger browser font size.
+
+## Experiment Notes
+
+Notes render the README's headings (levels 1–3), paragraphs, bullet and numbered lists, bold text, inline code, fenced code, and inline links. Web, mail, and relative links are supported; raw HTML is shown as text. This is a small renderer for these features rather than a full Markdown implementation.
+
+To verify, open Camera Kaleidoscope's menu and expand Notes. Pattern names should be bold, verification steps should be a ten-item numbered list, reference links should be underlined and reachable with Tab, and code should stay literal. Run `npm test` for the Markdown renderer checks.
 
 ## Naming conventions
 

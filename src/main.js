@@ -187,6 +187,7 @@ function renderExperimentView(experiment) {
       <aside class="experiment-controls-shell" aria-label="Experiment controls">
         <div id="experiment-controls" class="experiment-controls"></div>
       </aside>
+      <div id="experiment-content"></div>
     </div>
   `;
 
@@ -195,6 +196,7 @@ function renderExperimentView(experiment) {
   experiment.start({
     mountId: "experiment-stage",
     controlsMountId: "experiment-controls",
+    contentMountId: "experiment-content",
   });
 }
 
@@ -225,9 +227,9 @@ function renderDrawer({ title, body }) {
   return `
     <div class="menu-scrim" data-menu-close data-menu-scrim></div>
 
-    <aside class="site-drawer" id="site-drawer" aria-hidden="true" data-menu-drawer>
+    <aside class="site-drawer" id="site-drawer" role="dialog" aria-modal="true" aria-labelledby="site-drawer-heading" aria-hidden="true" tabindex="-1" inert data-menu-drawer>
       <div class="drawer-header">
-        <p class="drawer-heading">${escapeHtml(title)}</p>
+        <p class="drawer-heading" id="site-drawer-heading">${escapeHtml(title)}</p>
         <button class="drawer-close" type="button" data-menu-close aria-label="Close menu">Close</button>
       </div>
 
@@ -338,10 +340,40 @@ function setupMenuInteractions() {
     return;
   }
 
+  // Experiments can append UI after setup, including while the menu is open.
+  const background = new Map();
+  const makeBackgroundInert = () => {
+    for (const element of drawer.parentElement.children) {
+      if (element === drawer || element.matches("[data-menu-scrim]")) continue;
+      if (!background.has(element)) background.set(element, element.inert);
+      element.inert = true;
+    }
+  };
+  const backgroundObserver = new MutationObserver(makeBackgroundInert);
+
   const setMenuState = (isOpen) => {
-    document.body.dataset.menuState = isOpen ? "open" : "closed";
+    const state = isOpen ? "open" : "closed";
+    if (document.body.dataset.menuState === state) return;
+    document.body.dataset.menuState = state;
     toggleButton.setAttribute("aria-expanded", String(isOpen));
-    drawer.setAttribute("aria-hidden", String(!isOpen));
+    toggleButton.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
+
+    if (isOpen) {
+      drawer.inert = false;
+      drawer.setAttribute("aria-hidden", "false");
+      makeBackgroundInert();
+      backgroundObserver.observe(drawer.parentElement, { childList: true });
+      drawer.scrollTop = 0;
+      drawer.querySelector("[data-menu-close]").focus({ preventScroll: true });
+    } else {
+      backgroundObserver.disconnect();
+      background.forEach((wasInert, element) => { element.inert = wasInert; });
+      background.clear();
+      // Restore focus before hiding the drawer from assistive technology.
+      toggleButton.focus({ preventScroll: true });
+      drawer.inert = true;
+      drawer.setAttribute("aria-hidden", "true");
+    }
   };
 
   toggleButton.addEventListener("click", () => {
@@ -361,8 +393,25 @@ function setupMenuInteractions() {
   });
 
   document.addEventListener("keydown", (event) => {
+    if (document.body.dataset.menuState !== "open") return;
+
     if (event.key === "Escape") {
+      event.preventDefault();
       setMenuState(false);
+    } else if (event.key === "Tab") {
+      // Recheck visible controls so expanding Notes joins the normal tab sequence.
+      const focusable = Array.from(drawer.querySelectorAll(
+        "a[href], button, input, select, textarea, summary, [tabindex]"
+      )).filter((element) => element.tabIndex >= 0 && !element.disabled &&
+        !element.closest("[inert]") && element.getClientRects().length > 0);
+      const first = focusable[0] || drawer;
+      const last = focusable[focusable.length - 1] || drawer;
+      const active = document.activeElement;
+      if (active === drawer || !drawer.contains(active) ||
+          (event.shiftKey ? active === first : active === last)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      }
     }
   });
 }

@@ -5,8 +5,40 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;");
 }
 
-function formatInline(value) {
-  return escapeHtml(value).replace(/`([^`]+)`/g, "<code>$1</code>");
+function linkHref(value) {
+  // Notes support web/mail links and relative URLs, while keeping HTML inert.
+  if (/[\s\u0000-\u001f\u007f]/.test(value)) return null;
+  try {
+    const url = new URL(value, "https://notes.invalid/");
+    if (!["http:", "https:", "mailto:"].includes(url.protocol)) return null;
+  } catch {
+    return null;
+  }
+  return escapeHtml(value).replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+}
+
+function formatInline(value, allowLinks = true) {
+  // Tokenize before escaping so code stays literal and generated tags aren't reparsed.
+  const tokens = /`([^`]+)`|\*\*((?:`[^`]*`|[^`])+?)\*\*|\[([^\]]+)\]\(((?:[^()\s]|\([^()\s]*\))+)\)/g;
+  const chunks = [];
+  let offset = 0;
+  for (const match of value.matchAll(tokens)) {
+    chunks.push(escapeHtml(value.slice(offset, match.index)));
+    const [token, code, strong, label, href] = match;
+    if (code !== undefined) {
+      chunks.push(`<code>${escapeHtml(code)}</code>`);
+    } else if (strong !== undefined) {
+      chunks.push(`<strong>${formatInline(strong, allowLinks)}</strong>`);
+    } else {
+      const safeHref = allowLinks ? linkHref(href) : null;
+      chunks.push(safeHref === null
+        ? escapeHtml(token)
+        : `<a href="${safeHref}">${formatInline(label, false)}</a>`);
+    }
+    offset = match.index + token.length;
+  }
+  chunks.push(escapeHtml(value.slice(offset)));
+  return chunks.join("");
 }
 
 export function renderMarkdown(markdown) {
@@ -14,6 +46,8 @@ export function renderMarkdown(markdown) {
   const chunks = [];
   let paragraph = [];
   let list = [];
+  let listType = null;
+  let listStart = 1;
   let code = [];
   let inCode = false;
 
@@ -26,12 +60,13 @@ export function renderMarkdown(markdown) {
   function flushList() {
     if (!list.length) return;
     const items = list.map((item) => `<li>${formatInline(item)}</li>`).join("");
-    chunks.push(`<ul>${items}</ul>`);
+    const start = listType === "ol" && listStart !== 1 ? ` start="${listStart}"` : "";
+    chunks.push(`<${listType}${start}>${items}</${listType}>`);
     list = [];
+    listType = null;
   }
 
   function flushCode() {
-    if (!code.length) return;
     chunks.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
     code = [];
   }
@@ -83,18 +118,26 @@ export function renderMarkdown(markdown) {
       continue;
     }
 
-    if (trimmed.startsWith("- ")) {
+    const listItem = /^(?:([-*]) |(\d+)[.)] )(.+)$/.exec(trimmed);
+    if (listItem) {
       flushParagraph();
-      list.push(trimmed.slice(2));
+      const type = listItem[1] ? "ul" : "ol";
+      if (listType && listType !== type) flushList();
+      if (!listType) {
+        listType = type;
+        listStart = type === "ol" ? Number(listItem[2]) : 1;
+      }
+      list.push(listItem[3]);
       continue;
     }
 
+    flushList();
     paragraph.push(trimmed);
   }
 
   flushParagraph();
   flushList();
-  flushCode();
+  if (inCode) flushCode();
 
   return chunks.join("");
 }

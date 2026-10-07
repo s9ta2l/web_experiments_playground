@@ -8,18 +8,25 @@ export function startLineSpectrumExperiment({
   new p5((p) => {
     // Tweakables
     let gridCount = 60;
-    let bendMax = 0.95; // 1.0 = perfect half-circle
+    let bendMax = 0.95; // Bend of the rightmost column; 0 = straight.
     let segments = 24;
     let gap = 1;
     let pad = 28;
     const BG = 8;
+    const STROKE_WEIGHT = 1;
+    const MIN_LINE_HEIGHT = 1;
+    const MAX_GAP = 6;
+    const GAP_STEP = 0.1;
+    let gapControl;
 
     p.setup = () => {
       p.createCanvas(p.windowWidth, p.windowHeight).parent(mountId);
       p.pixelDensity(1);
       p.noFill();
       p.stroke(230);
-      p.strokeWeight(1);
+      p.strokeWeight(STROKE_WEIGHT);
+      p.strokeCap(p.ROUND);
+      p.strokeJoin(p.ROUND);
 
       const panel = createControlPanel(p, controlsMountId);
 
@@ -32,6 +39,7 @@ export function startLineSpectrumExperiment({
       });
       gridControl.slider.input(() => {
         gridCount = Number(gridControl.slider.value());
+        updateGapRange();
         p.redraw();
       });
 
@@ -60,13 +68,13 @@ export function startLineSpectrumExperiment({
         p.redraw();
       });
 
-      const gapControl = addSliderControl(p, panel, {
+      gapControl = addSliderControl(p, panel, {
         label: "Gap",
         min: 0,
-        max: 6,
+        max: MAX_GAP,
         value: gap,
-        step: 0.1,
-        format: (value) => Number(value).toFixed(1),
+        step: GAP_STEP,
+        format: (value) => `${Number(value).toFixed(1)} px`,
       });
       gapControl.slider.input(() => {
         gap = Number(gapControl.slider.value());
@@ -82,41 +90,59 @@ export function startLineSpectrumExperiment({
       });
       padControl.slider.input(() => {
         pad = Number(padControl.slider.value());
+        updateGapRange();
         p.redraw();
       });
 
       // Static study: render once, then only when a control or viewport changes.
+      updateGapRange();
       p.noLoop();
     };
 
     p.draw = () => {
       p.background(BG);
 
-      const w = p.width - pad * 2;
-      const h = p.height - pad * 2;
-      const gapX = Math.min(gap, (w / (gridCount - 1)) * 0.2);
-      const gapY = Math.min(gap, (h / (gridCount - 1)) * 0.2);
-      const cellW = (w - gapX * (gridCount - 1)) / (gridCount - 1);
-      const cellH = (h - gapY * (gridCount - 1)) / (gridCount - 1);
+      // Fit every row and reserve the stroke radius inside the padded border.
+      const w = p.width - pad * 2 - STROKE_WEIGHT;
+      const h = p.height - pad * 2 - STROKE_WEIGHT;
+      if (w <= 0 || h <= 0) return;
+      const origin = pad + STROKE_WEIGHT / 2;
+      const cellH = (h - gap * (gridCount - 1)) / gridCount;
+      // Keep the rightmost bend inside the border rather than clipping its bulge.
+      const maxBend = Math.min(w, cellH * 0.5 * bendMax);
+      const columnSpan = w - maxBend;
 
       for (let gy = 0; gy < gridCount; gy++) {
-        const y0 = pad + gy * (cellH + gapY);
+        const y0 = origin + gy * (cellH + gap);
         const y1 = y0 + cellH;
         for (let gx = 0; gx < gridCount; gx++) {
-          const x = pad + gx * (cellW + gapX);
           const t = gx / (gridCount - 1);
-          const curve = bendMax * t;
-          drawBentLine(x, y0, y1, curve);
+          const x = origin + t * columnSpan;
+          drawBentLine(x, y0, y1, maxBend * t);
         }
       }
     };
 
     p.windowResized = () => {
-      p.resizeCanvas(p.windowWidth, p.windowHeight);
+      // Update the allowed gap before drawing the new viewport.
+      p.resizeCanvas(p.windowWidth, p.windowHeight, true);
+      updateGapRange();
+      p.redraw();
     };
 
-    function drawBentLine(x, yTop, yBot, curve) {
-      const maxOffset = (yBot - yTop) * 0.5 * curve;
+    function updateGapRange() {
+      if (!gapControl) return;
+      const h = Math.max(0, p.height - pad * 2 - STROKE_WEIGHT);
+      const minHeight = Math.min(MIN_LINE_HEIGHT, h / gridCount);
+      const fitGap = Math.max(0, (h - gridCount * minHeight) / (gridCount - 1));
+      const maxGap = Math.floor(Math.min(MAX_GAP, fitGap) / GAP_STEP) * GAP_STEP;
+      // The native range clamps its value too, so its readout matches the drawing.
+      gapControl.slider.attribute("max", maxGap.toFixed(1));
+      gap = Number(gapControl.slider.value());
+      gapControl.sync();
+    }
+
+    function drawBentLine(x, yTop, yBot, maxOffset) {
       const a = 1.0;
       const b = 1.0;
       const peakT = a / (a + b);

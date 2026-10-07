@@ -114,18 +114,41 @@ export function startECGExperiment({
       p.text(overlay, textX, margin + 24);
     };
 
-    p.keyPressed = () => {
-      if (p.keyCode === p.UP_ARROW) scaleY = Math.min(260, scaleY + 10);
-      if (p.keyCode === p.DOWN_ARROW) scaleY = Math.max(20, scaleY - 10);
+    p.keyPressed = (event) => {
+      // Keep native slider/editing keys and menu navigation separate from shortcuts.
+      if (
+        event.target.closest?.("input, textarea, select") ||
+        event.target.isContentEditable ||
+        document.body.dataset.menuState === "open" ||
+        event.altKey || event.ctrlKey || event.metaKey
+      ) {
+        return;
+      }
 
-      if (p.keyCode === p.RIGHT_ARROW) speed = Math.min(10, speed + 1);
-      if (p.keyCode === p.LEFT_ARROW) speed = Math.max(1, speed - 1);
-
-      if (p.key === 'r' || p.key === 'R') {
-        regenerateBpm();
+      // p5 2 arrow constants are key strings, rather than numeric keyCodes.
+      switch (p.key) {
+        case p.UP_ARROW:
+          scaleY = Math.min(260, scaleY + 10);
+          break;
+        case p.DOWN_ARROW:
+          scaleY = Math.max(20, scaleY - 10);
+          break;
+        case p.RIGHT_ARROW:
+          speed = Math.min(10, speed + 1);
+          break;
+        case p.LEFT_ARROW:
+          speed = Math.max(1, speed - 1);
+          break;
+        case "r":
+        case "R":
+          regenerateBpm();
+          break;
+        default:
+          return;
       }
 
       syncControlUi();
+      return false;
     };
 
     p.windowResized = () => {

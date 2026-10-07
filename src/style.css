@@ -139,6 +139,11 @@ pre {
 }
 
 .menu-button {
+  --menu-line-height: 1.5px;
+  --menu-line-gap: 0.24rem;
+  /* Stack the bars and use their actual pitch to meet at the cross's center. */
+  flex-direction: column;
+  gap: var(--menu-line-gap);
   cursor: pointer;
   border: 1px solid var(--line);
   background: rgba(255, 249, 239, 0.66);
@@ -147,14 +152,11 @@ pre {
 
 .menu-button-line {
   width: 1rem;
-  height: 1.5px;
+  height: var(--menu-line-height);
+  flex-shrink: 0;
   border-radius: 999px;
   background: currentColor;
   transition: transform 180ms ease, opacity 180ms ease;
-}
-
-.menu-button-line + .menu-button-line {
-  margin-top: 0.24rem;
 }
 
 body[data-mode="experiment"] .site-home-link,
@@ -166,7 +168,7 @@ body[data-mode="experiment"] .menu-button {
 }
 
 body[data-menu-state="open"] .menu-button-line:nth-child(1) {
-  transform: translateY(0.39rem) rotate(45deg);
+  transform: translateY(calc(var(--menu-line-height) + var(--menu-line-gap))) rotate(45deg);
 }
 
 body[data-menu-state="open"] .menu-button-line:nth-child(2) {
@@ -174,7 +176,7 @@ body[data-menu-state="open"] .menu-button-line:nth-child(2) {
 }
 
 body[data-menu-state="open"] .menu-button-line:nth-child(3) {
-  transform: translateY(-0.39rem) rotate(-45deg);
+  transform: translateY(calc(-1 * (var(--menu-line-height) + var(--menu-line-gap)))) rotate(-45deg);
 }
 
 .menu-scrim {
@@ -201,8 +203,11 @@ body[data-menu-state="open"] .menu-button-line:nth-child(3) {
   color: var(--drawer-ink);
   border: 1px solid var(--drawer-line);
   backdrop-filter: blur(18px);
-  transform: translateX(calc(100% + 1rem));
-  transition: transform 220ms ease;
+  /* Clear the full right inset, then hide the closed drawer after its slide. */
+  transform: translateX(calc(100% + env(safe-area-inset-right, 0px) + var(--shell-gap)));
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 220ms ease, visibility 0s linear 220ms;
 }
 
 body[data-menu-state="open"] .menu-scrim {
@@ -212,6 +217,9 @@ body[data-menu-state="open"] .menu-scrim {
 
 body[data-menu-state="open"] .site-drawer {
   transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
 }
 
 .drawer-header,
@@ -307,7 +315,8 @@ body[data-menu-state="open"] .site-drawer {
 .drawer-experiment-copy,
 .markdown-body,
 .markdown-body p,
-.markdown-body ul {
+.markdown-body ul,
+.markdown-body ol {
   color: var(--drawer-soft);
 }
 
@@ -701,13 +710,58 @@ body[data-menu-state="open"] .site-drawer {
   background: rgba(216, 177, 30, 0.08);
 }
 
+/* Keep matrix columns readable; smaller screens can swipe between full cards. */
+.rotation-matrices {
+  position: fixed;
+  left: calc(env(safe-area-inset-left, 0px) + 16px);
+  right: calc(env(safe-area-inset-right, 0px) + 16px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  z-index: 5;
+}
+
+.rotation-matrix {
+  scroll-snap-align: start;
+}
+
+@media (max-width: 559px) {
+  .experiment-controls-shell.rotations-controls-shell {
+    /* Leave room for the cubes and matrices on short portrait screens. */
+    max-height: min(17rem, max(4rem, calc(100dvh - 24rem)));
+  }
+}
+
+@media (min-width: 560px) and (max-height: 650px) {
+  .rotation-matrices {
+    left: calc(env(safe-area-inset-left, 0px) + var(--shell-gap) + 18rem + 12px);
+  }
+
+  .experiment-controls-shell.rotations-controls-shell {
+    max-height: min(17rem, max(10rem, calc(100dvh - 12rem)));
+  }
+}
+
 .markdown-body p,
-.markdown-body ul {
+.markdown-body ul,
+.markdown-body ol {
   margin: 0.45rem 0;
 }
 
-.markdown-body ul {
+.markdown-body ul,
+.markdown-body ol {
   padding-left: 1.15rem;
+}
+
+.markdown-body a {
+  color: var(--drawer-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  overflow-wrap: anywhere;
 }
 
 .markdown-body h2,
@@ -805,7 +859,8 @@ body[data-menu-state="open"] .site-drawer {
   }
 }
 
-@media (max-width: 520px), (max-height: 760px) {
+/* Choose the phone layout by width; short desktop windows keep their columns. */
+@media (max-width: 520px) {
   .site-drawer {
     top: calc(env(safe-area-inset-top, 0px) + 4.15rem);
     right: calc(env(safe-area-inset-right, 0px) + 0.35rem);
