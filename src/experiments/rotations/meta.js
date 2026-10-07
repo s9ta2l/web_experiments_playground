@@ -16,6 +16,7 @@ export const meta = {
     "Reset the timeline and all axes to θ = 0 (the identity matrix).",
     "ω_x, ω_y, ω_z — angular speed per axis. Changing speed preserves the pose; 0 freezes it.",
     "On smaller screens, swipe the matrix row to compare all three axes.",
+    "For screen readers, pause and browse the Rotation matrices region to read each axis.",
   ],
   previewUrl,
   readme,

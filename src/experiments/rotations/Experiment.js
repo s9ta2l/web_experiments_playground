@@ -37,6 +37,7 @@ const CONSTANT_MASK = {
 export function startRotationsExperiment({
   mountId = "app",
   controlsMountId = mountId,
+  contentMountId = mountId,
 } = {}) {
   let layoutObserver;
   const sketch = new p5((p) => {
@@ -239,8 +240,11 @@ export function startRotationsExperiment({
 
     function buildMatrixCards() {
       const container = p.createDiv();
-      container.parent(mountId);
+      // Readable matrices live outside the decorative canvas's aria-hidden stage.
+      container.parent(contentMountId);
       container.addClass("rotation-matrices");
+      container.attribute("role", "region");
+      container.attribute("aria-label", "Rotation matrices");
       matrixContainer = container;
 
       cards = {
@@ -254,6 +258,8 @@ export function startRotationsExperiment({
       const card = p.createDiv();
       card.parent(container);
       card.addClass("rotation-matrix");
+      card.attribute("role", "group");
+      card.attribute("aria-label", `${axis.toUpperCase()}-axis rotation matrix`);
       Object.assign(card.elt.style, {
         flex: `1 0 ${MATRIX_CARD_MIN_WIDTH}px`,
         minWidth: `${MATRIX_CARD_MIN_WIDTH}px`,
@@ -306,6 +312,8 @@ export function startRotationsExperiment({
       const grid = p.createDiv();
       grid.parent(card);
       grid.addClass("rotation-matrix-values");
+      grid.attribute("role", "group");
+      grid.attribute("aria-label", "Numeric entries in row order");
       Object.assign(grid.elt.style, {
         marginTop: "0.55rem",
         display: "grid",
@@ -331,6 +339,8 @@ export function startRotationsExperiment({
       const captionGrid = p.createDiv();
       captionGrid.parent(card);
       captionGrid.addClass("rotation-matrix-formulas");
+      captionGrid.attribute("role", "group");
+      captionGrid.attribute("aria-label", "Formula entries in row order");
       Object.assign(captionGrid.elt.style, {
         marginTop: "0.35rem",
         display: "grid",

@@ -40,6 +40,8 @@ src/experiments/index.js
 
 That registry powers the showroom cards, experiment navigation, descriptions, credits, and readme support.
 
+Experiment runtimes receive `mountId` for the drawing stage, `controlsMountId` for controls, and `contentMountId` for readable overlays. Put text such as matrix values in the content mount so it remains available to assistive technology. The drawing stage is decorative by default; experiments with an interactive canvas, such as Kaleidoscope, explicitly expose it.
+
 ## Add a new experiment
 
 1. Copy `src/experiments/_template/` into a new folder named after your experiment id.

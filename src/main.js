@@ -187,6 +187,7 @@ function renderExperimentView(experiment) {
       <aside class="experiment-controls-shell" aria-label="Experiment controls">
         <div id="experiment-controls" class="experiment-controls"></div>
       </aside>
+      <div id="experiment-content"></div>
     </div>
   `;
 
@@ -195,6 +196,7 @@ function renderExperimentView(experiment) {
   experiment.start({
     mountId: "experiment-stage",
     controlsMountId: "experiment-controls",
+    contentMountId: "experiment-content",
   });
 }
 
