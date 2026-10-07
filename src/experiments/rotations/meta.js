@@ -15,6 +15,7 @@ export const meta = {
     "Play / Pause to start or stop the animation.",
     "Reset to return to θ = 0 (the identity matrix).",
     "ω_x, ω_y, ω_z — angular speed per axis. Set one to 0 to freeze that axis.",
+    "On smaller screens, swipe the matrix row to compare all three axes.",
   ],
   previewUrl,
   readme,

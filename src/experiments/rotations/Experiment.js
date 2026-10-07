@@ -14,6 +14,8 @@ const AXIS_LINE_WEIGHT = 2.4;
 const CUBE_LINE_WEIGHT = 1.4;
 const VIEW_TILT_X = -Math.PI / 7;
 const VIEW_TILT_Y = Math.PI / 6;
+const MATRIX_CARD_MIN_WIDTH = 224;
+const LAYOUT_GAP = 12;
 const AXIS_COLORS = {
   x: "#dc2626",
   y: "#16a34a",
@@ -36,7 +38,8 @@ export function startRotationsExperiment({
   mountId = "app",
   controlsMountId = mountId,
 } = {}) {
-  new p5((p) => {
+  let layoutObserver;
+  const sketch = new p5((p) => {
     let t = 0;
     let paused = false;
     let omegaX = 1.0;
@@ -49,6 +52,11 @@ export function startRotationsExperiment({
     let playPauseButton;
     let resetButton;
     let cards;
+    let matrixContainer;
+    let controlsShell;
+    let stripOffset = 0;
+    let viewCenterX = 0;
+    let viewCenterY = 0;
 
     p.setup = () => {
       const canvas = p.createCanvas(p.windowWidth, p.windowHeight, p.WEBGL);
@@ -57,6 +65,8 @@ export function startRotationsExperiment({
       computeSizes();
 
       const panel = createControlPanel(p, controlsMountId);
+      controlsShell = panel.elt.closest(".experiment-controls-shell");
+      controlsShell?.classList.add("rotations-controls-shell");
 
       timelineControl = addSliderControl(p, panel, {
         label: "Timeline",
@@ -98,6 +108,11 @@ export function startRotationsExperiment({
       void omegaZControl;
 
       buildMatrixCards();
+      computeSizes();
+      // Reflow only when panel sizes change, rather than reading layout in draw().
+      layoutObserver = new ResizeObserver(computeSizes);
+      layoutObserver.observe(matrixContainer.elt);
+      if (controlsShell) layoutObserver.observe(controlsShell);
     };
 
     p.draw = () => {
@@ -114,10 +129,12 @@ export function startRotationsExperiment({
 
       p.background(BG[0], BG[1], BG[2]);
 
-      const stripOffset = p.width / 3;
+      p.push();
+      p.translate(viewCenterX, viewCenterY);
       drawStrip("x", thetaX, -stripOffset);
       drawStrip("y", thetaY, 0);
       drawStrip("z", thetaZ, stripOffset);
+      p.pop();
 
       updateCard(cards.x, "x", thetaX);
       updateCard(cards.y, "y", thetaY);
@@ -176,26 +193,42 @@ export function startRotationsExperiment({
     }
 
     function computeSizes() {
-      const stripWidth = p.width / 3;
-      const target = Math.min(stripWidth, p.height) * 0.42;
-      boxSize = Math.max(70, Math.min(190, target));
+      let left = 0;
+      let top = 0;
+      let width = p.width;
+      let height = p.height;
+      if (matrixContainer && controlsShell) {
+        const matrices = matrixContainer.elt.getBoundingClientRect();
+        const controls = controlsShell.getBoundingClientRect();
+        if (matrices.left > controls.right) {
+          // In short landscape layouts, use whichever free area fits larger cubes.
+          const belowHeight = p.height - controls.bottom - 2 * LAYOUT_GAP;
+          const aboveHeight = matrices.top - controls.top - LAYOUT_GAP;
+          const useBelow = Math.min(controls.width / 3, belowHeight)
+            > Math.min(matrices.width / 3, aboveHeight);
+          left = useBelow ? controls.left : matrices.left;
+          top = useBelow ? controls.bottom + LAYOUT_GAP : controls.top;
+          width = useBelow ? controls.width : matrices.width;
+          height = useBelow ? belowHeight : aboveHeight;
+        } else if (p.width < 560) {
+          // Portrait cubes sit between the controls and the swipeable matrix row.
+          top = controls.bottom + LAYOUT_GAP;
+          height = matrices.top - top - LAYOUT_GAP;
+        }
+      }
+      stripOffset = width / 3;
+      viewCenterX = left + width / 2 - p.width / 2;
+      viewCenterY = top + height / 2 - p.height / 2;
+      const target = Math.min(stripOffset, Math.max(1, height)) * 0.42;
+      boxSize = Math.max(16, Math.min(190, target));
       axisLen = boxSize * 0.95;
     }
 
     function buildMatrixCards() {
       const container = p.createDiv();
       container.parent(mountId);
-      Object.assign(container.elt.style, {
-        position: "fixed",
-        left: "16px",
-        right: "16px",
-        bottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)",
-        display: "flex",
-        gap: "12px",
-        justifyContent: "space-between",
-        zIndex: "5",
-        pointerEvents: "none",
-      });
+      container.addClass("rotation-matrices");
+      matrixContainer = container;
 
       cards = {
         x: buildCard(container, "x"),
@@ -207,9 +240,10 @@ export function startRotationsExperiment({
     function buildCard(container, axis) {
       const card = p.createDiv();
       card.parent(container);
+      card.addClass("rotation-matrix");
       Object.assign(card.elt.style, {
-        flex: "1 1 0",
-        minWidth: "0",
+        flex: `1 0 ${MATRIX_CARD_MIN_WIDTH}px`,
+        minWidth: `${MATRIX_CARD_MIN_WIDTH}px`,
         maxWidth: "420px",
         padding: "0.7rem 0.9rem 0.85rem",
         background: "rgba(255, 251, 244, 0.86)",
@@ -252,19 +286,22 @@ export function startRotationsExperiment({
         marginTop: "0.25rem",
         fontFamily: "SFMono-Regular, Menlo, Consolas, monospace",
         fontSize: "0.78rem",
+        lineHeight: "1.3",
         color: "rgba(16, 16, 16, 0.66)",
       });
 
       const grid = p.createDiv();
       grid.parent(card);
+      grid.addClass("rotation-matrix-values");
       Object.assign(grid.elt.style, {
         marginTop: "0.55rem",
         display: "grid",
-        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+        gridTemplateColumns: "repeat(3, minmax(5ch, 1fr))",
         rowGap: "0.12rem",
         columnGap: "0.7rem",
         fontFamily: "SFMono-Regular, Menlo, Consolas, monospace",
         fontSize: "0.98rem",
+        lineHeight: "1.2",
       });
 
       const cells = [];
@@ -280,14 +317,16 @@ export function startRotationsExperiment({
 
       const captionGrid = p.createDiv();
       captionGrid.parent(card);
+      captionGrid.addClass("rotation-matrix-formulas");
       Object.assign(captionGrid.elt.style, {
         marginTop: "0.35rem",
         display: "grid",
-        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+        gridTemplateColumns: "repeat(3, minmax(5ch, 1fr))",
         rowGap: "0.05rem",
         columnGap: "0.7rem",
         fontFamily: "SFMono-Regular, Menlo, Consolas, monospace",
         fontSize: "0.7rem",
+        lineHeight: "1.2",
         color: "rgba(16, 16, 16, 0.5)",
       });
 
@@ -340,5 +379,9 @@ export function startRotationsExperiment({
       const sign = value < 0 ? "−" : "";
       return `${sign}${Math.abs(value).toFixed(2)}`;
     }
+  });
+  if (import.meta.hot) import.meta.hot.dispose(() => {
+    layoutObserver?.disconnect();
+    sketch.remove();
   });
 }
