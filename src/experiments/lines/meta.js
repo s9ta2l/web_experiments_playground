@@ -10,10 +10,11 @@ export const meta = {
   mode: "static",
   themes: ["pattern", "field"],
   controls: [
-    "Use Grid density to change the number of lines.",
+    "Use Grid density to change the number of rows and columns.",
     "Use Bend to change how far each line curves.",
     "Use Segments to adjust curve smoothness.",
-    "Use Gap and Padding to adjust spacing around the lines.",
+    "Gap sets vertical spacing in pixels. Its range adapts to the screen and density.",
+    "Padding sets a clear border around the field, including the curved strokes.",
   ],
   previewUrl,
   readme,
