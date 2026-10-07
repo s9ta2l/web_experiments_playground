@@ -86,7 +86,8 @@ export function addButton(p, parent, label, onPress, variant = "default") {
     button.addClass(`control-button--${variant}`);
   }
 
-  button.mousePressed(onPress);
+  // Native click also covers Enter, Space, and taps, with one callback per action.
+  button.mouseClicked(onPress);
   return button;
 }
 

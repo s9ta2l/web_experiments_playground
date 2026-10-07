@@ -55,6 +55,12 @@ That registry powers the showroom cards, experiment navigation, descriptions, cr
 - If you change controls or behavior, update both `meta.js` and the experiment `README.md`.
 - If the preview is no longer representative, update `preview.svg`.
 
+## Shared experiment controls
+
+Use the helpers in [controlPanel.js](./src/experiments/shared/controlPanel.js) for experiment panels. `addButton` handles native click activation from mouse, touch, Enter, and Space.
+
+To verify buttons, open Rotations and Tab to Pause. Enter should change its label to Play and stop the cubes; Space should resume them. Pause again, Tab to Reset, and activate it to return all three matrices to the identity. Check Clear, Randomize BPM, and Start in their experiments with both keys, then check mouse clicks and phone taps.
+
 ## Naming conventions
 
 - `id`: stable URL slug, lower camel case or short kebab-style equivalent already used by the project.
