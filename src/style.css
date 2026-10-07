@@ -139,6 +139,11 @@ pre {
 }
 
 .menu-button {
+  --menu-line-height: 1.5px;
+  --menu-line-gap: 0.24rem;
+  /* Stack the bars and use their actual pitch to meet at the cross's center. */
+  flex-direction: column;
+  gap: var(--menu-line-gap);
   cursor: pointer;
   border: 1px solid var(--line);
   background: rgba(255, 249, 239, 0.66);
@@ -147,14 +152,11 @@ pre {
 
 .menu-button-line {
   width: 1rem;
-  height: 1.5px;
+  height: var(--menu-line-height);
+  flex-shrink: 0;
   border-radius: 999px;
   background: currentColor;
   transition: transform 180ms ease, opacity 180ms ease;
-}
-
-.menu-button-line + .menu-button-line {
-  margin-top: 0.24rem;
 }
 
 body[data-mode="experiment"] .site-home-link,
@@ -166,7 +168,7 @@ body[data-mode="experiment"] .menu-button {
 }
 
 body[data-menu-state="open"] .menu-button-line:nth-child(1) {
-  transform: translateY(0.39rem) rotate(45deg);
+  transform: translateY(calc(var(--menu-line-height) + var(--menu-line-gap))) rotate(45deg);
 }
 
 body[data-menu-state="open"] .menu-button-line:nth-child(2) {
@@ -174,7 +176,7 @@ body[data-menu-state="open"] .menu-button-line:nth-child(2) {
 }
 
 body[data-menu-state="open"] .menu-button-line:nth-child(3) {
-  transform: translateY(-0.39rem) rotate(-45deg);
+  transform: translateY(calc(-1 * (var(--menu-line-height) + var(--menu-line-gap)))) rotate(-45deg);
 }
 
 .menu-scrim {

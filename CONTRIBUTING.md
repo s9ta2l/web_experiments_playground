@@ -73,6 +73,8 @@ The menu is a modal dialog. Opening it moves focus to Close and makes the backgr
 
 To verify, Tab around a page with the menu closed: no offscreen menu controls should receive focus. Open the menu with Enter, cycle forward and backward through it, then press Escape. Focus should return to Open menu, and the page controls should work again. Repeat on the showroom, About, and an experiment page, and check both Close and backdrop clicks.
 
+The menu button shows three vertically stacked bars when closed and a centered cross when open. Check both states on desktop and phone widths, including with a larger browser font size.
+
 ## Naming conventions
 
 - `id`: stable URL slug, lower camel case or short kebab-style equivalent already used by the project.
