@@ -10,7 +10,8 @@ export function startChaosPendulumExperiment({
   mountId = "app",
   controlsMountId = mountId,
 } = {}) {
-  new p5((p) => {
+  let layoutObserver;
+  const sketch = new p5((p) => {
     // Tweakables
     const L1 = 200;
     const L2 = 120;
@@ -22,6 +23,8 @@ export function startChaosPendulumExperiment({
     const DAMP = 0.995;
     const ITER = 6;
     const BG = 10;
+    const VIEW_GAP = 16;
+    const VIEW_REACH = L1 + L2 + L3 + 12;
 
     const p0 = { x: 0, y: 0 };
     const p1 = { x: 0, y: 0 };
@@ -34,12 +37,18 @@ export function startChaosPendulumExperiment({
 
     let startButton;
     let stateControl;
+    let viewport;
+    let controlsShell;
+    let pivotX = 0;
+    let pivotY = 0;
+    let viewRadius = 0;
 
     p.setup = () => {
       p.createCanvas(p.windowWidth, p.windowHeight).parent(mountId);
       p.pixelDensity(1);
 
       const panel = createControlPanel(p, controlsMountId);
+      controlsShell = panel.elt.closest(".experiment-controls-shell");
       stateControl = addStatControl(p, panel, {
         label: "State",
         value: "Waiting",
@@ -55,15 +64,40 @@ export function startChaosPendulumExperiment({
       resetWithRandomPush();
       running = false;
       stateControl.valueEl.html("Ready");
+
+      // Measure safe-area bounds only on resize; this empty frame never paints.
+      viewport = p.createDiv();
+      viewport.parent(mountId);
+      viewport.addClass("pendulum-viewport");
+      Object.assign(viewport.elt.style, {
+        position: "fixed",
+        top: `calc(env(safe-area-inset-top, 0px) + ${VIEW_GAP}px)`,
+        right: `calc(env(safe-area-inset-right, 0px) + ${VIEW_GAP}px)`,
+        bottom: `calc(env(safe-area-inset-bottom, 0px) + ${VIEW_GAP}px)`,
+        left: `calc(env(safe-area-inset-left, 0px) + ${VIEW_GAP}px)`,
+        visibility: "hidden",
+        pointerEvents: "none",
+      });
+      updateLayout();
+      layoutObserver = new ResizeObserver(updateLayout);
+      layoutObserver.observe(viewport.elt);
+      if (controlsShell) layoutObserver.observe(controlsShell);
     };
 
     p.draw = () => {
       p.background(BG);
-      p.translate(p.width * 0.5, p.height * 0.25);
 
       if (running) {
         stepSimulation();
       }
+
+      // Fit the whole swing, including brief solver stretch, without changing physics.
+      const reach = Math.max(VIEW_REACH,
+        Math.hypot(p1.x, p1.y) + 6,
+        Math.hypot(p2.x, p2.y) + 5,
+        Math.hypot(p3.x, p3.y) + 4);
+      p.translate(pivotX, pivotY);
+      p.scale(Math.min(1, viewRadius / reach));
 
       p.stroke(220);
       p.strokeWeight(2);
@@ -80,7 +114,34 @@ export function startChaosPendulumExperiment({
 
     p.windowResized = () => {
       p.resizeCanvas(p.windowWidth, p.windowHeight);
+      updateLayout();
     };
+
+    function updateLayout() {
+      if (!viewport) return;
+      const bounds = viewport.elt.getBoundingClientRect();
+      let left = bounds.left;
+      let top = bounds.top;
+      let width = bounds.width;
+      let height = bounds.height;
+      if (controlsShell) {
+        const controls = controlsShell.getBoundingClientRect();
+        const besideLeft = Math.max(bounds.left, controls.right + VIEW_GAP);
+        const belowTop = Math.max(bounds.top, controls.bottom + VIEW_GAP);
+        const besideWidth = Math.max(0, bounds.right - besideLeft);
+        const belowHeight = Math.max(0, bounds.bottom - belowTop);
+        if (Math.min(besideWidth, height) > Math.min(width, belowHeight)) {
+          left = besideLeft;
+          width = besideWidth;
+        } else {
+          top = belowTop;
+          height = belowHeight;
+        }
+      }
+      pivotX = left + width / 2;
+      pivotY = top + height / 2;
+      viewRadius = Math.max(0, Math.min(width, height) / 2);
+    }
 
     function resetWithRandomPush() {
       const a1 = p.random(-p.HALF_PI, p.HALF_PI);
@@ -151,5 +212,9 @@ export function startChaosPendulumExperiment({
       b.x -= dx * diff * rB;
       b.y -= dy * diff * rB;
     }
+  });
+  if (import.meta.hot) import.meta.hot.dispose(() => {
+    layoutObserver?.disconnect();
+    sketch.remove();
   });
 }
