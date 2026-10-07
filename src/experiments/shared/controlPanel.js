@@ -1,3 +1,5 @@
+let sliderId = 0;
+
 export function createControlPanel(p, mountId, title = "Controls") {
   const panel = p.createDiv();
   panel.parent(mountId);
@@ -22,7 +24,7 @@ export function addSliderControl(
   header.parent(field);
   header.addClass("control-field__header");
 
-  const labelEl = p.createDiv(label);
+  const labelEl = p.createElement("label", label);
   labelEl.parent(header);
   labelEl.addClass("control-label");
 
@@ -33,6 +35,13 @@ export function addSliderControl(
   const slider = p.createSlider(min, max, value, step);
   slider.parent(field);
   slider.addClass("control-range");
+  // Native labels name the slider and let clicking its caption focus it.
+  let inputId;
+  do {
+    inputId = `experiment-slider-${++sliderId}`;
+  } while (document.getElementById(inputId));
+  slider.id(inputId);
+  labelEl.attribute("for", inputId);
 
   const sync = () => {
     valueEl.html(format(slider.value()));

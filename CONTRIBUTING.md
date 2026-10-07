@@ -59,6 +59,8 @@ That registry powers the showroom cards, experiment navigation, descriptions, cr
 
 Use the helpers in [controlPanel.js](./src/experiments/shared/controlPanel.js) for experiment panels. `addButton` handles native click activation from mouse, touch, Enter, and Space.
 
+`addSliderControl` connects a native label to each slider with a unique ID. Screen readers announce the visible caption along with the range value. To verify, click a slider caption: that slider should receive focus. Its arrow keys should adjust its value normally. Inspect the browser accessibility tree or use a screen reader to check that every slider has its caption as its name.
+
 To verify buttons, open Rotations and Tab to Pause. Enter should change its label to Play and stop the cubes; Space should resume them. Pause again, Tab to Reset, and activate it to return all three matrices to the identity. Check Clear, Randomize BPM, and Start in their experiments with both keys, then check mouse clicks and phone taps.
 
 ## Menu accessibility
