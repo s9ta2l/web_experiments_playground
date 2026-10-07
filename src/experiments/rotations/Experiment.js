@@ -45,6 +45,9 @@ export function startRotationsExperiment({
     let omegaX = 1.0;
     let omegaY = 1.0;
     let omegaZ = 1.0;
+    let thetaX = 0;
+    let thetaY = 0;
+    let thetaZ = 0;
     let boxSize = 140;
     let axisLen = 130;
 
@@ -77,7 +80,10 @@ export function startRotationsExperiment({
         format: (v) => `t = ${Number(v).toFixed(2)}`,
       });
       timelineControl.slider.input(() => {
-        t = Number(timelineControl.slider.value());
+        // Scrub relative to the current pose, preserving phase from earlier cycles.
+        const nextT = Number(timelineControl.slider.value());
+        advanceAngles(nextT - t);
+        t = nextT;
       });
 
       const buttons = addButtonRow(p, panel);
@@ -87,6 +93,9 @@ export function startRotationsExperiment({
       });
       resetButton = addButton(p, buttons, "Reset", () => {
         t = 0;
+        thetaX = 0;
+        thetaY = 0;
+        thetaZ = 0;
         timelineControl.slider.value(0);
         timelineControl.valueEl.html("t = 0.00");
       });
@@ -117,15 +126,12 @@ export function startRotationsExperiment({
 
     p.draw = () => {
       if (!paused) {
-        t += p.deltaTime / 1000;
-        if (t > T_MAX) t -= T_MAX;
+        const dt = p.deltaTime / 1000;
+        advanceAngles(dt);
+        t = (t + dt) % T_MAX;
         timelineControl.slider.value(t);
         timelineControl.valueEl.html(`t = ${t.toFixed(2)}`);
       }
-
-      const thetaX = omegaX * t;
-      const thetaY = omegaY * t;
-      const thetaZ = omegaZ * t;
 
       p.background(BG[0], BG[1], BG[2]);
 
@@ -145,6 +151,13 @@ export function startRotationsExperiment({
       p.resizeCanvas(p.windowWidth, p.windowHeight);
       computeSizes();
     };
+
+    function advanceAngles(dt) {
+      // Axis angles keep their phase when the timeline loops or a speed changes.
+      thetaX = (thetaX + omegaX * dt) % T_MAX;
+      thetaY = (thetaY + omegaY * dt) % T_MAX;
+      thetaZ = (thetaZ + omegaZ * dt) % T_MAX;
+    }
 
     function addOmegaSlider(panel, label, initialValue, onChange) {
       const control = addSliderControl(p, panel, {
