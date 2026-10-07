@@ -61,6 +61,12 @@ Use the helpers in [controlPanel.js](./src/experiments/shared/controlPanel.js) f
 
 To verify buttons, open Rotations and Tab to Pause. Enter should change its label to Play and stop the cubes; Space should resume them. Pause again, Tab to Reset, and activate it to return all three matrices to the identity. Check Clear, Randomize BPM, and Start in their experiments with both keys, then check mouse clicks and phone taps.
 
+## Menu accessibility
+
+The menu is a modal dialog. Opening it moves focus to Close and makes the background inert. Tab and Shift+Tab cycle through the visible drawer controls, including expanded Notes. Escape, Close, and the backdrop return focus to the menu button; the closed drawer is inert and fully hidden.
+
+To verify, Tab around a page with the menu closed: no offscreen menu controls should receive focus. Open the menu with Enter, cycle forward and backward through it, then press Escape. Focus should return to Open menu, and the page controls should work again. Repeat on the showroom, About, and an experiment page, and check both Close and backdrop clicks.
+
 ## Naming conventions
 
 - `id`: stable URL slug, lower camel case or short kebab-style equivalent already used by the project.

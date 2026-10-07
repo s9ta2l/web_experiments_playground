@@ -201,8 +201,11 @@ body[data-menu-state="open"] .menu-button-line:nth-child(3) {
   color: var(--drawer-ink);
   border: 1px solid var(--drawer-line);
   backdrop-filter: blur(18px);
-  transform: translateX(calc(100% + 1rem));
-  transition: transform 220ms ease;
+  /* Clear the full right inset, then hide the closed drawer after its slide. */
+  transform: translateX(calc(100% + env(safe-area-inset-right, 0px) + var(--shell-gap)));
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 220ms ease, visibility 0s linear 220ms;
 }
 
 body[data-menu-state="open"] .menu-scrim {
@@ -212,6 +215,9 @@ body[data-menu-state="open"] .menu-scrim {
 
 body[data-menu-state="open"] .site-drawer {
   transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
 }
 
 .drawer-header,
