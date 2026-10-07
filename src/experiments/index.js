@@ -41,6 +41,8 @@ export const experiments = [
   ),
 ];
 
-export const experimentsById = Object.fromEntries(
-  experiments.map((experiment) => [experiment.id, experiment])
+// URL IDs must resolve only to registered experiments, never inherited properties.
+export const experimentsById = Object.assign(
+  Object.create(null),
+  Object.fromEntries(experiments.map((experiment) => [experiment.id, experiment]))
 );
