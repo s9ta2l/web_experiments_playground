@@ -3,16 +3,16 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { renderMarkdown } from "./markdown.js";
 
-test("Kaleidoscope Notes render the authored emphasis, ten steps, and three references", async () => {
+test("Kaleidoscope Notes render the authored emphasis, verification steps, and references", async () => {
   const readme = await readFile(new URL("../experiments/kaleidoscope/README.md", import.meta.url), "utf8");
   const html = renderMarkdown(readme);
   assert.match(html, /<strong>Classic<\/strong>/);
   assert.match(html, /<strong>Phone camera access requires trusted HTTPS\.<\/strong>/);
   const steps = html.match(/<ol>(.*?)<\/ol>/s)[1];
-  assert.equal((steps.match(/<li>/g) || []).length, 10);
+  assert.equal((steps.match(/<li>/g) || []).length, (readme.match(/^\d+\. /gm) || []).length);
   assert.equal((html.match(/<a href="https:/g) || []).length, 3);
   assert.match(html, /<code>http:\/\/&lt;computer-lan-ip&gt;:5173<\/code>/);
-  assert.match(html, /<pre><code>npm run dev\nnpm run build<\/code><\/pre>/);
+  assert.match(html, /<pre><code>npm run dev\nnpm test\nnpm run build<\/code><\/pre>/);
 });
 
 test("paragraphs, list types, non-one numbering, and headings retain their order", () => {
