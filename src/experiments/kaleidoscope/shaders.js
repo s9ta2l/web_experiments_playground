@@ -21,6 +21,8 @@ export const fragmentShader = `
   uniform sampler2D uCamera;
   // uViewport is reserved by p5 and is overwritten every draw.
   uniform vec2 uScreenSize;
+  // Export changes the visible crop without changing the live mirror scale.
+  uniform vec2 uFrameSize;
   uniform vec2 uTurn;
   uniform vec2 uSourceScale;
   uniform vec2 uCellCenter;
@@ -57,7 +59,7 @@ export const fragmentShader = `
   }
 
   void main() {
-    vec2 point = (vTexCoord - 0.5) * uScreenSize;
+    vec2 point = (vTexCoord - 0.5) * uFrameSize;
     point *= uCellScale / max(uScreenSize.x, uScreenSize.y);
     vec2 source = foldMirrors(point + uCellCenter) - uCellCenter;
 

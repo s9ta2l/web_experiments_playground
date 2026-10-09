@@ -968,8 +968,14 @@ body[data-experiment="kaleidoscope"] .experiment-controls {
   border: 1px solid rgba(255, 255, 255, 0.22);
 }
 
+.kaleidoscope-capture {
+  background: #9adbc5;
+  color: #101820;
+}
+
 .kaleidoscope-toolbar button:focus-visible,
-.kaleidoscope-start:focus-visible {
+.kaleidoscope-start:focus-visible,
+.kaleidoscope-photo-button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -1059,8 +1065,124 @@ body[data-experiment="kaleidoscope"] .experiment-controls {
   pointer-events: none;
 }
 
+/* This outline is the exact centered 9:16 area saved by Capture photo. */
+.kaleidoscope-frame {
+  position: fixed;
+  z-index: 1;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 0 100vmax rgba(7, 12, 18, 0.18);
+  pointer-events: none;
+}
+
+.kaleidoscope-frame span {
+  position: absolute;
+  top: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.15rem 0.5rem;
+  border-radius: 1rem;
+  background: rgba(7, 12, 18, 0.65);
+  color: #f5f5f0;
+  font-size: 0.65rem;
+  white-space: nowrap;
+}
+
+/* A native modal keeps preview keyboard focus and touch input inside it. */
+.kaleidoscope-photo {
+  width: min(34rem, calc(100% - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 2rem));
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 2rem);
+  margin: auto;
+  padding: 1rem;
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 1rem;
+  color: #f5f5f0;
+  background: #071019;
+}
+
+.kaleidoscope-photo::backdrop {
+  background: rgba(7, 12, 18, 0.8);
+}
+
+.kaleidoscope-photo-layout,
+.kaleidoscope-photo-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.kaleidoscope-photo-image {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 17rem);
+  align-self: center;
+  object-fit: contain;
+  border-radius: 0.4rem;
+}
+
+.kaleidoscope-photo-copy h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.kaleidoscope-photo-copy p {
+  margin: 0;
+  color: rgba(245, 245, 240, 0.75);
+  font-size: 0.85rem;
+}
+
+.kaleidoscope-photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.kaleidoscope-photo-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.6rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.kaleidoscope-photo-button[data-photo-download] {
+  background: #9adbc5;
+  color: #101820;
+  border-color: transparent;
+}
+
+.kaleidoscope-photo-button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+@media (min-width: 560px) and (max-height: 560px) {
+  .kaleidoscope-photo {
+    width: min(48rem, calc(100% - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 2rem));
+  }
+
+  .kaleidoscope-photo-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 1fr);
+    align-items: center;
+  }
+
+  .kaleidoscope-photo-image {
+    justify-self: center;
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 4rem);
+  }
+}
+
 .kaleidoscope-gate[hidden],
 .kaleidoscope-toolbar[hidden],
-.kaleidoscope-hint[hidden] {
+.kaleidoscope-hint[hidden],
+.kaleidoscope-frame[hidden],
+.kaleidoscope-photo [hidden] {
   display: none;
 }

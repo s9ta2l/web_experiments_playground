@@ -1,5 +1,7 @@
 import p5 from "p5";
 import { vertexShader, fragmentShader } from "./shaders.js";
+import { captureStoryPhoto, getStoryCrop } from "./photoCapture.js";
+import { createPhotoPreview } from "./photoPreview.js";
 
 // Keep the camera and single shader modest enough for mobile GPUs.
 const FRAME_RATE = 30;
@@ -36,10 +38,12 @@ export function startKaleidoscopeExperiment({
         `).join("")}
       </div>
       <button class="kaleidoscope-flip" type="button" aria-label="Use front camera">Flip camera</button>
+      <button class="kaleidoscope-capture" type="button">Capture photo</button>
     </div>
   `;
   const toolbar = controls.querySelector(".kaleidoscope-toolbar");
   const flipButton = controls.querySelector(".kaleidoscope-flip");
+  const captureButton = controls.querySelector(".kaleidoscope-capture");
   const patternButtons = [...controls.querySelectorAll("[data-pattern]")];
 
   const gate = document.createElement("section");
@@ -50,7 +54,7 @@ export function startKaleidoscopeExperiment({
     <h1 class="kaleidoscope-title"></h1>
     <p class="kaleidoscope-message" role="status" aria-live="polite"></p>
     <button class="kaleidoscope-start" type="button">Start camera</button>
-    <p class="kaleidoscope-privacy">Live on your device. Nothing is recorded or uploaded.</p>
+    <p class="kaleidoscope-privacy">Live on your device. Photos are created only when you capture them. Nothing is uploaded.</p>
   `;
   page.append(gate);
   const title = gate.querySelector(".kaleidoscope-title");
@@ -62,6 +66,13 @@ export function startKaleidoscopeExperiment({
   hint.textContent = "Drag left or right to turn";
   hint.hidden = true;
   page.append(hint);
+
+  const frameGuide = document.createElement("div");
+  frameGuide.className = "kaleidoscope-frame";
+  frameGuide.setAttribute("aria-hidden", "true");
+  frameGuide.hidden = true;
+  frameGuide.innerHTML = "<span>Story frame</span>";
+  stage.append(frameGuide);
 
   let sketch;
   let video;
@@ -80,6 +91,21 @@ export function startKaleidoscopeExperiment({
   const viewport = [1, 1];
   const sourceScale = [1, 1];
   const rotation = [1, 0];
+  const photoPreview = createPhotoPreview({
+    parent: page,
+    capture: () => {
+      if (state !== "live" || video.elt.readyState < 2) throw new Error("The camera is not ready.");
+      return captureStoryPhoto(sketch, mirrorShader, viewport[0], viewport[1]);
+    },
+    onOpen: () => { dragPointer = null; sketch.noLoop(); },
+    onClose: () => {
+      if (disposed) return;
+      if (state === "live" && !document.hidden) {
+        sketch.loop();
+        captureButton.focus({ preventScroll: true });
+      } else if (!document.hidden) startButton.focus({ preventScroll: true });
+    },
+  });
 
   function showGate(nextState, heading, detail, action = "Try again") {
     state = nextState;
@@ -87,6 +113,7 @@ export function startKaleidoscopeExperiment({
     gate.hidden = false;
     toolbar.hidden = true;
     hint.hidden = true;
+    frameGuide.hidden = true;
     title.textContent = heading;
     message.textContent = detail;
     startButton.textContent = action;
@@ -150,8 +177,9 @@ export function startKaleidoscopeExperiment({
       gate.hidden = true;
       toolbar.hidden = false;
       hint.hidden = hasTurned;
+      frameGuide.hidden = false;
       flipButton.setAttribute("aria-label", facing === "user" ? "Use rear camera" : "Use front camera");
-      sketch.loop();
+      if (!photoPreview.isOpen) sketch.loop();
     } catch {
       if (disposed || id !== requestId) return;
       showGate("paused", "Your camera is ready", "Tap below to start the live kaleidoscope.", "Start camera");
@@ -229,8 +257,15 @@ export function startKaleidoscopeExperiment({
   patternButtons.forEach((button, index) => {
     button.addEventListener("click", () => selectPattern(index), { signal: events.signal });
   });
+  captureButton.addEventListener("click", () => {
+    if (state === "live" && video.elt.readyState >= 2) photoPreview.open();
+  }, { signal: events.signal });
 
-  const resizeObserver = new ResizeObserver(() => resizeCanvas());
+  const resizeObserver = new ResizeObserver((entries) => {
+    if (entries.some((entry) => entry.target === stage)) resizeCanvas();
+    // Keep the turning hint above the toolbar as buttons wrap on narrow phones.
+    hint.style.bottom = `calc(env(safe-area-inset-bottom, 0px) + ${toolbar.offsetHeight}px + 1.45rem)`;
+  });
   function resizeCanvas() {
     if (!sketch?._renderer || disposed) return;
     const width = Math.max(1, stage.clientWidth);
@@ -242,6 +277,12 @@ export function startKaleidoscopeExperiment({
     viewport[0] = width;
     viewport[1] = height;
     mirrorShader?.setUniform("uScreenSize", viewport);
+    mirrorShader?.setUniform("uFrameSize", viewport);
+    const crop = getStoryCrop(width, height);
+    Object.assign(frameGuide.style, {
+      width: `${crop.width}px`, height: `${crop.height}px`,
+      left: `${crop.left}px`, top: `${crop.top}px`,
+    });
   }
 
   sketch = new p5((p) => {
@@ -254,7 +295,7 @@ export function startKaleidoscopeExperiment({
         canvas.addClass("kaleidoscope-canvas");
         canvas.elt.tabIndex = 0;
         canvas.elt.setAttribute("role", "img");
-        canvas.elt.setAttribute("aria-label", "Live camera kaleidoscope. Drag left or right, or use the left and right arrow keys, to turn the pattern.");
+        canvas.elt.setAttribute("aria-label", "Live camera kaleidoscope. Drag or use left and right arrow keys to turn. Capture photo saves the centered portrait Story frame.");
         p.noStroke();
         p.frameRate(FRAME_RATE);
         p.noLoop();
@@ -271,6 +312,7 @@ export function startKaleidoscopeExperiment({
         selectPattern(0);
         resizeCanvas();
         resizeObserver.observe(stage);
+        resizeObserver.observe(toolbar);
         video.elt.addEventListener("loadedmetadata", updateSourceScale, { signal: events.signal });
         video.elt.addEventListener("resize", updateSourceScale, { signal: events.signal });
         video.elt.addEventListener("pause", () => {
@@ -315,7 +357,7 @@ export function startKaleidoscopeExperiment({
     };
 
     p.draw = () => {
-      if (state !== "live" || video.elt.readyState < 2) return;
+      if (state !== "live" || video.elt.readyState < 2 || photoPreview.isOpen) return;
       // One video texture and one plane; no per-pixel JavaScript or frame buffers.
       p.shader(mirrorShader);
       p.plane(p.width, p.height);
@@ -340,10 +382,12 @@ export function startKaleidoscopeExperiment({
     disposed = true;
     events.abort();
     resizeObserver.disconnect();
+    photoPreview.destroy();
     releaseCamera();
     sketch.remove();
     gate.remove();
     hint.remove();
+    frameGuide.remove();
     controls.replaceChildren();
   }
   if (import.meta.hot) import.meta.hot.dispose(destroy);
