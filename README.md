@@ -66,7 +66,11 @@ If your repository name changes, update `package.json` or set `BASE_PATH` during
 
 ## How the gallery works
 
-- The showroom is the default landing page.
+- The gallery is the default landing page.
+- Home cards use full-bleed preview art: hover or keyboard focus swaps the title for a larger description. Touch screens show both, and reduced-motion preferences disable the transition.
+- The bare hamburger opens Gallery, About, and experiment titles with a smooth slide and colors matching the page. Click it again, press Escape, or click outside to close the menu.
+- Each experiment’s info icon replaces the controls with its description, expandable Instructions and Notes, and a copy-link icon. Close information to restore the controls and their settings. Camera Kaleidoscope uses the same switch beside its bottom toolbar.
+- On phones, settings panels start closed. Tap Controls for a full-screen glass panel, use its info icon for information, and close the panel to return to the artwork. Settings survive opening, closing, and screen rotation. Kaleidoscope keeps all pattern, Flip camera, and Capture photo buttons directly available in a responsive bottom toolbar, with a separate info icon and no Controls opener.
 - Each experiment opens with `/?experiment=<id>`.
 - Legacy `?sketch=<id>` links still resolve, but `experiment` is the preferred query parameter now.
 
@@ -86,6 +90,9 @@ Current experiment ids:
 ```txt
 src/
   app/
+    dialog.js
+    experimentInfo.js
+    experimentControls.js
     markdown.js
   experiments/
     index.js
@@ -110,3 +117,5 @@ src/
    - the notes and preview still match the actual output
 
 For the full contributor workflow, see [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+Branding and shared interface rules are recorded in [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md). This document is for contributors and is not rendered in the website.

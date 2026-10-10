@@ -3,10 +3,10 @@ import previewUrl from "./preview.svg";
 
 export const meta = {
   id: "art-code-wake",
-  title: "Art / Code Wake",
+  chromeTheme: "light",
+  title: "Cursor Trails",
   description: "Move through a pale blue-white canvas to reveal a fading water-like mesh, with optional binary and brush marks beside the cursor.",
   authors: [],
-  status: "Open for collaboration",
   mode: "interactive",
   themes: ["art", "code", "cursor"],
   controls: [

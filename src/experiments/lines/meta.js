@@ -6,7 +6,6 @@ export const meta = {
   title: "Bent Line Field",
   description: "A dense grid of vertical strokes that gradually bend into smooth arcs from left to right.",
   authors: [],
-  status: "Open for collaboration",
   mode: "static",
   themes: ["pattern", "field"],
   controls: [

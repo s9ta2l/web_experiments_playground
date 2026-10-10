@@ -6,7 +6,6 @@ export const meta = {
   title: "Your Experiment Title",
   description: "One sentence explaining what visitors will see or do.",
   authors: ["Your Name"],
-  status: "Open for collaboration",
   mode: "interactive",
   themes: ["theme-one", "theme-two"],
   controls: [

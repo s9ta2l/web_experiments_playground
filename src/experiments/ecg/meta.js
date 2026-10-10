@@ -3,10 +3,9 @@ import previewUrl from "./preview.svg";
 
 export const meta = {
   id: "ecg",
-  title: "Synthetic ECG",
+  title: "ECG",
   description: "A scrolling heartbeat trace over an ECG-style grid with keyboard controls for speed and scale.",
   authors: [],
-  status: "Open for collaboration",
   mode: "interactive",
   themes: ["signal", "data"],
   controls: [

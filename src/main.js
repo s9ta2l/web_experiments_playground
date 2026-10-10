@@ -1,4 +1,7 @@
 import "./style.css";
+import { setupDialog } from "./app/dialog.js";
+import { setupExperimentInfo } from "./app/experimentInfo.js";
+import { setupExperimentControls } from "./app/experimentControls.js";
 import { renderMarkdown } from "./app/markdown.js";
 import { experiments, experimentsById } from "./experiments/index.js";
 
@@ -22,6 +25,7 @@ function render() {
       ? "about"
       : "showroom";
   document.body.dataset.menuState = "closed";
+  document.body.dataset.infoState = "closed";
 
   if (activeExperiment) {
     renderExperimentView(activeExperiment);
@@ -40,13 +44,7 @@ function renderShowroomView(invalidExperimentId) {
   app.innerHTML = `
     <div class="site-page">
       ${renderTopbar()}
-      ${renderDrawer({
-        title: "Menu",
-        body: `
-          ${renderDrawerNav("showroom")}
-          ${renderExperimentsDirectory()}
-        `,
-      })}
+      ${renderDrawer("showroom")}
 
       <main class="landing-main">
         <section class="landing-hero">
@@ -54,14 +52,16 @@ function renderShowroomView(invalidExperimentId) {
             invalidExperimentId && !experimentsById[invalidExperimentId]
               ? `
                 <p class="inline-note">
-                  ${escapeHtml(invalidExperimentId)} is not registered yet. You are seeing the showroom instead.
+                  ${escapeHtml(invalidExperimentId)} is not registered yet. You are seeing the gallery instead.
                 </p>
               `
               : ""
           }
-          <h1>Open the showroom, remix an idea, add your own page.</h1>
           <p class="hero-copy">
-            This gallery hosts p5.js browser experiments designed to be explored by visitors and extended by friends. Click any experiment below to open it.
+            A playground of web experiments created by
+            <a href="${portfolioHref}" target="_blank" rel="noreferrer">@alexev_studio</a>
+            and friends. Made for everyone to play with and build on.
+            See <a href="${createAboutHref()}">About</a> for more.
           </p>
         </section>
 
@@ -83,13 +83,7 @@ function renderAboutView() {
   app.innerHTML = `
     <div class="site-page">
       ${renderTopbar()}
-      ${renderDrawer({
-        title: "Menu",
-        body: `
-          ${renderDrawerNav("about")}
-          ${renderExperimentsDirectory()}
-        `,
-      })}
+      ${renderDrawer("about")}
 
       <main class="about-main">
         <h1>About</h1>
@@ -101,8 +95,8 @@ function renderAboutView() {
         <section class="about-section" id="browse">
           <h2>How to browse</h2>
           <p>
-            The landing page is a minimal showroom. Each experiment opens on its own direct link, while the
-            menu collects the full experiment notes, controls, and the rest of the gallery in one place.
+            The landing page is a minimal gallery. Each experiment opens on its own direct link.
+            Use the menu to browse the gallery and the info icon beside the controls for instructions and notes.
           </p>
         </section>
 
@@ -112,7 +106,7 @@ function renderAboutView() {
             <li>Copy <code>src/experiments/_template/</code> into a new experiment folder.</li>
             <li>Update <code>Experiment.js</code>, <code>meta.js</code>, <code>README.md</code>, and <code>preview.svg</code>.</li>
             <li>Register the experiment in <code>src/experiments/index.js</code>.</li>
-            <li>Run <code>npm run dev</code> and verify the showroom entry and the direct link.</li>
+            <li>Run <code>npm run dev</code> and verify the gallery entry and the direct link.</li>
           </ol>
         </section>
 
@@ -134,7 +128,7 @@ function renderAboutView() {
   README.md
   preview.svg</code></pre>
           <p>
-            Every experiment is registered through <code>src/experiments/index.js</code>, which powers the showroom,
+            Every experiment is registered through <code>src/experiments/index.js</code>, which powers the gallery,
             experiment titles, descriptions, controls, notes, and navigation.
           </p>
         </section>
@@ -149,49 +143,64 @@ function renderAboutView() {
 
 function renderExperimentView(experiment) {
   app.innerHTML = `
-    <div class="experiment-page">
-      <div id="experiment-stage" class="experiment-stage" aria-hidden="true"></div>
+    <div class="experiment-page" data-chrome-theme="${experiment.chromeTheme || "dark"}">
+      <div id="experiment-stage" class="experiment-stage" aria-hidden="true">
+        <div class="experiment-artwork-viewport"></div>
+      </div>
       ${renderTopbar()}
-      ${renderDrawer({
-        title: "Experiment menu",
-        body: `
-          ${renderDrawerNav("experiment")}
-
-          <section class="drawer-section">
-            <p class="drawer-label">Experiment</p>
-            <h2 class="drawer-title">${escapeHtml(experiment.title)}</h2>
-            <p class="drawer-copy">${escapeHtml(experiment.description)}</p>
-            <p class="drawer-meta">${escapeHtml(formatAuthors(experiment.authors))}</p>
-            <p class="drawer-meta">${escapeHtml(experiment.status)}</p>
-          </section>
-
-          <section class="drawer-section">
-            <h3>Instructions</h3>
-            <ul class="drawer-list">
-              ${experiment.controls.map((control) => `<li>${escapeHtml(control)}</li>`).join("")}
-            </ul>
-          </section>
-
-          <details class="drawer-section drawer-details">
-            <summary>Notes</summary>
-            <div class="markdown-body markdown-body--inverse">${renderMarkdown(experiment.readme)}</div>
-          </details>
-
-          <section class="drawer-section drawer-actions">
-            <button class="drawer-button" type="button" data-copy-link>Copy link</button>
-          </section>
-
-          ${renderExperimentsDirectory(experiment.id)}
-        `,
-      })}
+      ${renderDrawer("experiment", experiment.id)}
       <aside class="experiment-controls-shell" aria-label="Experiment controls">
-        <div id="experiment-controls" class="experiment-controls"></div>
+        <div class="experiment-controls-header">
+          <p class="mobile-controls-title" id="mobile-controls-title">
+            <span class="controls-view-label">Controls</span><span class="info-view-label">Information</span>
+          </p>
+          <button class="experiment-info-toggle icon-button" type="button"
+            aria-label="Open experiment information" aria-expanded="false"
+            aria-controls="experiment-info" data-info-toggle>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <g class="info-toggle-symbol"><circle cx="12" cy="12" r="9" />
+                <path d="M12 10.5v6" /><circle cx="12" cy="7.5" r="0.75" fill="currentColor" stroke="none" /></g>
+              <path class="info-close-symbol" d="m6 6 12 12M18 6 6 18" />
+              <path class="info-back-symbol" d="m14 6-6 6 6 6M8 12h12" />
+            </svg>
+          </button>
+          <button class="experiment-controls-close icon-button" type="button" aria-label="Return to experiment" data-controls-close>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+          </button>
+        </div>
+        <div class="experiment-controls-body">
+          <div id="experiment-controls" class="experiment-controls"></div>
+          ${renderExperimentInfo(experiment)}
+        </div>
       </aside>
+      <dialog class="mobile-controls-dialog" id="mobile-controls-dialog" aria-labelledby="mobile-controls-title"></dialog>
+      <div class="experiment-quick-actions">
+        <button class="experiment-controls-open" type="button" data-controls-open
+          aria-label="Open experiment controls" aria-haspopup="dialog" aria-expanded="false" aria-controls="mobile-controls-dialog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M4 7h6m4 0h6M4 17h10m4 0h2" /><circle cx="12" cy="7" r="2" /><circle cx="16" cy="17" r="2" />
+          </svg>
+          Controls
+        </button>
+      </div>
       <div id="experiment-content"></div>
     </div>
   `;
 
   setupMenuInteractions();
+  const information = setupExperimentInfo({
+    trigger: app.querySelector("[data-info-toggle]"),
+    panel: app.querySelector("#experiment-info"),
+    controls: app.querySelector("#experiment-controls"),
+    shell: app.querySelector(".experiment-controls-shell"),
+  });
+  setupExperimentControls({
+    shell: app.querySelector(".experiment-controls-shell"),
+    dialog: app.querySelector("#mobile-controls-dialog"),
+    trigger: app.querySelector("[data-controls-open]"),
+    information,
+    directControls: experiment.id === "kaleidoscope",
+  });
   setupCopyLink(experiment);
   experiment.start({
     mountId: "experiment-stage",
@@ -203,7 +212,7 @@ function renderExperimentView(experiment) {
 function renderTopbar() {
   return `
     <header class="site-topbar">
-      <a class="site-home-link" href="${createHomeHref()}" aria-label="Back to the showroom">
+      <a class="site-home-link" href="${createHomeHref()}" aria-label="Back to the gallery">
         <img class="site-logo" src="${createAssetHref("favicon.svg")}" alt="" />
       </a>
 
@@ -215,83 +224,97 @@ function renderTopbar() {
         aria-controls="site-drawer"
         data-menu-toggle
       >
-        <span class="menu-button-line"></span>
-        <span class="menu-button-line"></span>
-        <span class="menu-button-line"></span>
+        <span class="menu-button-line" aria-hidden="true"></span>
+        <span class="menu-button-line" aria-hidden="true"></span>
+        <span class="menu-button-line" aria-hidden="true"></span>
       </button>
     </header>
   `;
 }
 
-function renderDrawer({ title, body }) {
+function renderDrawer(currentView, activeExperimentId = null) {
   return `
-    <div class="menu-scrim" data-menu-close data-menu-scrim></div>
-
-    <aside class="site-drawer" id="site-drawer" role="dialog" aria-modal="true" aria-labelledby="site-drawer-heading" aria-hidden="true" tabindex="-1" inert data-menu-drawer>
-      <div class="drawer-header">
-        <p class="drawer-heading" id="site-drawer-heading">${escapeHtml(title)}</p>
-        <button class="drawer-close" type="button" data-menu-close aria-label="Close menu">Close</button>
+    <dialog class="site-drawer" id="site-drawer" aria-label="Site navigation" data-menu-drawer>
+      <div class="drawer-surface">
+        <div class="drawer-body">
+          ${renderDrawerNav(currentView)}
+          ${renderExperimentsDirectory(activeExperimentId)}
+        </div>
       </div>
-
-      <div class="drawer-body">
-        ${body}
-      </div>
-    </aside>
+    </dialog>
   `;
 }
 
 function renderDrawerNav(currentView) {
   return `
     <nav class="drawer-nav" aria-label="Primary">
-      ${
-        currentView === "showroom"
-          ? `<span class="drawer-nav-current">Showroom</span>`
-          : `<a class="drawer-nav-link" href="${createHomeHref()}">Showroom</a>`
-      }
-      ${
-        currentView === "about"
-          ? `<span class="drawer-nav-current">About</span>`
-          : `<a class="drawer-nav-link" href="${createAboutHref()}">About</a>`
-      }
+      <a class="drawer-nav-link" href="${createHomeHref()}" ${currentView === "showroom" ? 'aria-current="page"' : ""}>Gallery</a>
+      <a class="drawer-nav-link" href="${createAboutHref()}" ${currentView === "about" ? 'aria-current="page"' : ""}>About</a>
     </nav>
   `;
 }
 
 function renderExperimentsDirectory(activeExperimentId = null) {
   return `
-    <section class="drawer-section">
-      <h3>Experiments</h3>
       <nav class="drawer-experiments" aria-label="Experiments">
         ${experiments
           .map(
             (item) => `
               <a
-                class="drawer-experiment-link ${item.id === activeExperimentId ? "is-active" : ""}"
+                class="drawer-experiment-link"
                 href="${createExperimentHref(item.id)}"
+                ${item.id === activeExperimentId ? 'aria-current="page"' : ""}
               >
-                <span class="drawer-experiment-title">${escapeHtml(item.title)}</span>
-                <span class="drawer-experiment-copy">${escapeHtml(item.description)}</span>
+                ${escapeHtml(item.title)}
               </a>
             `
           )
           .join("")}
       </nav>
+  `;
+}
+
+function renderExperimentInfo(experiment) {
+  return `
+    <section class="experiment-info" id="experiment-info" aria-labelledby="experiment-info-title" hidden>
+      <h2 class="drawer-title" id="experiment-info-title">${escapeHtml(experiment.title)}</h2>
+      <p class="drawer-copy">${escapeHtml(experiment.description)}</p>
+      <div class="experiment-info-actions">
+        ${experiment.authors.length ? `<p class="drawer-meta">${escapeHtml(formatAuthors(experiment.authors))}</p>` : ""}
+        <button class="icon-button copy-link-button" type="button" data-copy-link aria-label="Copy experiment link" title="Copy link">
+          <svg class="copy-link-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="m10 13 4-4M8 16l-1 1a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0M13 17a4 4 0 0 0 6 0l4-4a4 4 0 0 0-6-6l-1 1" transform="translate(1 -1) scale(.92)" />
+          </svg>
+          <svg class="copy-link-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
+        </button>
+        <span class="visually-hidden" role="status" data-copy-status></span>
+      </div>
+      <section class="info-section">
+        ${renderInfoDisclosure("Instructions", "info-instructions", `<ul class="drawer-list">${experiment.controls.map((control) => `<li>${escapeHtml(control)}</li>`).join("")}</ul>`)}
+      </section>
+      <section class="info-section">
+        ${renderInfoDisclosure("Notes", "info-notes", `<div class="markdown-body markdown-body--inverse">${renderMarkdown(experiment.readme)}</div>`)}
+      </section>
     </section>
   `;
 }
 
-function renderExperimentLink(experiment) {
-  const cardTags = [experiment.mode, ...(experiment.themes || []).slice(0, 2)];
+function renderInfoDisclosure(label, id, content) {
+  return `
+    <button class="info-disclosure-trigger" type="button" aria-expanded="false" aria-controls="${id}" data-info-disclosure>
+      ${label}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+    </button>
+    <div class="info-disclosure-content" id="${id}" hidden><div class="info-disclosure-inner">${content}</div></div>
+  `;
+}
 
+function renderExperimentLink(experiment) {
   return `
     <a class="experiment-card" href="${createExperimentHref(experiment.id)}">
       <img class="experiment-card-preview" src="${experiment.previewUrl}" alt="" loading="lazy" />
       <h3 class="experiment-card-title">${escapeHtml(experiment.title)}</h3>
-      <p class="experiment-card-copy">${escapeHtml(experiment.description)}</p>
-      <div class="experiment-card-tags" aria-label="Experiment tags">
-        ${cardTags
-          .map((tag) => `<span class="experiment-tag">${escapeHtml(tag)}</span>`)
-          .join("")}
+      <div class="experiment-card-details">
+        <p class="experiment-card-copy">${escapeHtml(experiment.description)}</p>
       </div>
     </a>
   `;
@@ -340,101 +363,45 @@ function setupMenuInteractions() {
     return;
   }
 
-  // Experiments can append UI after setup, including while the menu is open.
-  const background = new Map();
-  const makeBackgroundInert = () => {
-    for (const element of drawer.parentElement.children) {
-      if (element === drawer || element.matches("[data-menu-scrim]")) continue;
-      if (!background.has(element)) background.set(element, element.inert);
-      element.inert = true;
-    }
-  };
-  const backgroundObserver = new MutationObserver(makeBackgroundInert);
-
-  const setMenuState = (isOpen) => {
-    const state = isOpen ? "open" : "closed";
-    if (document.body.dataset.menuState === state) return;
-    document.body.dataset.menuState = state;
-    toggleButton.setAttribute("aria-expanded", String(isOpen));
-    toggleButton.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
-
-    if (isOpen) {
-      drawer.inert = false;
-      drawer.setAttribute("aria-hidden", "false");
-      makeBackgroundInert();
-      backgroundObserver.observe(drawer.parentElement, { childList: true });
-      drawer.scrollTop = 0;
-      drawer.querySelector("[data-menu-close]").focus({ preventScroll: true });
-    } else {
-      backgroundObserver.disconnect();
-      background.forEach((wasInert, element) => { element.inert = wasInert; });
-      background.clear();
-      // Restore focus before hiding the drawer from assistive technology.
-      toggleButton.focus({ preventScroll: true });
-      drawer.inert = true;
-      drawer.setAttribute("aria-hidden", "true");
-    }
-  };
-
-  toggleButton.addEventListener("click", () => {
-    setMenuState(document.body.dataset.menuState !== "open");
-  });
-
-  app.querySelectorAll("[data-menu-close]").forEach((element) => {
-    element.addEventListener("click", () => {
-      setMenuState(false);
-    });
+  // Move the same icon into the modal so it stays visible and keyboard-reachable.
+  const menu = setupDialog({
+    trigger: toggleButton,
+    dialog: drawer,
+    stateKey: "menuState",
+    moveTrigger: true,
   });
 
   drawer.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", () => {
-      setMenuState(false);
-    });
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (document.body.dataset.menuState !== "open") return;
-
-    if (event.key === "Escape") {
-      event.preventDefault();
-      setMenuState(false);
-    } else if (event.key === "Tab") {
-      // Recheck visible controls so expanding Notes joins the normal tab sequence.
-      const focusable = Array.from(drawer.querySelectorAll(
-        "a[href], button, input, select, textarea, summary, [tabindex]"
-      )).filter((element) => element.tabIndex >= 0 && !element.disabled &&
-        !element.closest("[inert]") && element.getClientRects().length > 0);
-      const first = focusable[0] || drawer;
-      const last = focusable[focusable.length - 1] || drawer;
-      const active = document.activeElement;
-      if (active === drawer || !drawer.contains(active) ||
-          (event.shiftKey ? active === first : active === last)) {
-        event.preventDefault();
-        (event.shiftKey ? last : first).focus();
-      }
-    }
+    link.addEventListener("click", () => menu.close());
   });
 }
 
 function setupCopyLink(experiment) {
   const copyButton = app.querySelector("[data-copy-link]");
+  const status = app.querySelector("[data-copy-status]");
+  let resetTimer;
 
   copyButton?.addEventListener("click", async () => {
     const shareUrl = new URL(window.location.href);
     shareUrl.search = new URLSearchParams({ experiment: experiment.id }).toString();
 
+    window.clearTimeout(resetTimer);
     try {
       await navigator.clipboard.writeText(shareUrl.toString());
-      copyButton.textContent = "Link copied";
-      window.setTimeout(() => {
-        copyButton.textContent = "Copy link";
-      }, 1500);
+      copyButton.dataset.copyState = "copied";
+      status.textContent = "Link copied";
     } catch {
-      copyButton.textContent = "Copy failed";
-      window.setTimeout(() => {
-        copyButton.textContent = "Copy link";
-      }, 1500);
+      copyButton.dataset.copyState = "failed";
+      status.textContent = "Could not copy the link. Try again.";
     }
+    copyButton.setAttribute("aria-label", status.textContent);
+    copyButton.title = status.textContent;
+    resetTimer = window.setTimeout(() => {
+      delete copyButton.dataset.copyState;
+      copyButton.setAttribute("aria-label", "Copy experiment link");
+      copyButton.title = "Copy link";
+      status.textContent = "";
+    }, 1500);
   });
 }
 
@@ -459,7 +426,7 @@ function createAssetHref(assetPath) {
 }
 
 function formatAuthors(authors) {
-  return authors.length ? `By ${authors.join(", ")}` : "Open for contributors";
+  return `By ${authors.join(", ")}`;
 }
 
 function normalizeBasePath(value) {

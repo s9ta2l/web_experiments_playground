@@ -1,4 +1,4 @@
-# Orbital Spiral
+# Archimedean Spiral
 
 ## What it is
 

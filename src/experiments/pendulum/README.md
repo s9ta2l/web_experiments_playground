@@ -1,4 +1,4 @@
-# Triple Pendulum
+# Pendulum
 
 ## What it is
 

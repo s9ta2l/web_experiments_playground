@@ -3,10 +3,9 @@ import previewUrl from "./preview.svg";
 
 export const meta = {
   id: "pendulum",
-  title: "Triple Pendulum",
+  title: "Pendulum",
   description: "A constraint-based triple pendulum that starts from a random push and settles into chaotic motion.",
   authors: [],
-  status: "Open for collaboration",
   mode: "interactive",
   themes: ["physics", "chaos"],
   controls: [

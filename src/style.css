@@ -1,6 +1,6 @@
 :root {
   color: #111111;
-  background: #f6efe4;
+  background: #ffffff;
   font-family: "Avenir Next", "Trebuchet MS", sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -8,19 +8,34 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --paper: #f6efe4;
-  --paper-deep: #efe3d2;
+  /* Shared brand tokens are documented in DESIGN_SYSTEM.md. */
+  --logo-cyan: #22d3ee;
+  --logo-purple: #7c3aed;
+  --logo-fuchsia: #d946ef;
+  --logo-pink: #ff4f8b;
+  --paper: #ffffff;
   --ink: #101010;
   --ink-soft: rgba(16, 16, 16, 0.72);
-  --accent: #d8b11e;
+  --accent: var(--logo-purple);
+  --link-weight: 500;
   --line: rgba(16, 16, 16, 0.14);
   --text-column: 60ch;
   --shell-gap: clamp(0.85rem, 3vw, 1.2rem);
-  --drawer: rgba(7, 12, 18, 0.9);
+  /* Shared frosted glass: let live artwork supply the color beneath the tint. */
+  --glass-light: rgba(255, 255, 255, 0.64);
+  --glass-dark: rgba(7, 12, 18, 0.64);
+  --glass-surface: var(--glass-light);
+  --glass-fallback: var(--paper);
+  --glass-filter: blur(18px) saturate(1.15);
+  --glass-outline: var(--line);
   --drawer-line: rgba(255, 255, 255, 0.12);
   --drawer-ink: #f5f5f0;
-  --drawer-soft: rgba(245, 245, 240, 0.72);
-  --drawer-muted: rgba(245, 245, 240, 0.54);
+  --drawer-soft: rgba(245, 245, 240, 0.86);
+  --drawer-muted: rgba(245, 245, 240, 0.8);
+  --nav-ink: var(--ink);
+  --nav-soft: var(--ink-soft);
+  --nav-line: var(--line);
+  --nav-accent: var(--logo-purple);
 }
 
 * {
@@ -35,10 +50,7 @@ body {
 }
 
 body {
-  background:
-    radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 34%),
-    radial-gradient(circle at top right, rgba(249, 115, 22, 0.1), transparent 28%),
-    linear-gradient(180deg, #fff9ef 0%, #f6efe4 48%, #f1e7d9 100%);
+  background: var(--paper);
   color: var(--ink);
 }
 
@@ -50,6 +62,50 @@ body[data-mode="experiment"] {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* Text links share a subtle weight; image cards keep their own typography. */
+.hero-copy a,
+.about-main a,
+.footer-link,
+.drawer-nav-link,
+.drawer-experiment-link,
+.markdown-body a {
+  font-weight: var(--link-weight);
+  text-decoration: none;
+  transition: color 180ms ease;
+}
+
+.hero-copy a:hover,
+.about-main a:hover,
+.markdown-body a:hover {
+  color: var(--accent);
+}
+
+/* Use the logo's brighter fuchsia for accents against dark UI. */
+.experiment-page {
+  --accent: var(--logo-fuchsia);
+  --glass-surface: var(--glass-dark);
+  --glass-fallback: #071019;
+  --glass-outline: var(--drawer-line);
+  --nav-ink: var(--drawer-ink);
+  --nav-soft: var(--drawer-soft);
+  --nav-line: var(--drawer-line);
+  --nav-accent: var(--logo-fuchsia);
+}
+
+.experiment-page[data-chrome-theme="light"] {
+  --accent: var(--logo-purple);
+  --glass-surface: var(--glass-light);
+  --glass-fallback: var(--paper);
+  --drawer-line: var(--line);
+  --drawer-ink: var(--ink);
+  --drawer-soft: rgba(16, 16, 16, 0.8);
+  --drawer-muted: rgba(16, 16, 16, 0.7);
+  --nav-ink: var(--ink);
+  --nav-soft: var(--ink-soft);
+  --nav-line: var(--line);
+  --nav-accent: var(--logo-purple);
 }
 
 button {
@@ -109,7 +165,6 @@ pre {
   justify-content: center;
   width: 2.85rem;
   height: 2.85rem;
-  border-radius: 999px;
   transition:
     color 180ms ease,
     border-color 180ms ease,
@@ -120,16 +175,14 @@ pre {
 .site-home-link:hover,
 .menu-button:hover,
 .footer-link:hover,
-.experiment-card:hover,
 .drawer-nav-link:hover,
 .drawer-experiment-link:hover,
-.drawer-close:hover,
-.drawer-button:hover {
+.icon-button:hover,
+.info-disclosure-trigger:hover {
   color: var(--accent);
 }
 
-.site-home-link:hover,
-.menu-button:hover {
+.site-home-link:hover {
   transform: translateY(-1px);
 }
 
@@ -141,13 +194,10 @@ pre {
 .menu-button {
   --menu-line-height: 1.5px;
   --menu-line-gap: 0.24rem;
-  /* Stack the bars and use their actual pitch to meet at the cross's center. */
+  /* Keep the same bare hamburger when the navigation is open. */
   flex-direction: column;
   gap: var(--menu-line-gap);
   cursor: pointer;
-  border: 1px solid var(--line);
-  background: rgba(255, 249, 239, 0.66);
-  backdrop-filter: blur(10px);
 }
 
 .menu-button-line {
@@ -156,147 +206,155 @@ pre {
   flex-shrink: 0;
   border-radius: 999px;
   background: currentColor;
-  transition: transform 180ms ease, opacity 180ms ease;
 }
 
-body[data-mode="experiment"] .site-home-link,
 body[data-mode="experiment"] .menu-button {
   color: var(--drawer-ink);
-  border: 1px solid var(--drawer-line);
-  background: rgba(7, 12, 18, 0.56);
-  backdrop-filter: blur(10px);
 }
 
-body[data-menu-state="open"] .menu-button-line:nth-child(1) {
-  transform: translateY(calc(var(--menu-line-height) + var(--menu-line-gap))) rotate(45deg);
+[data-chrome-theme="light"] .site-topbar {
+  --accent: var(--logo-purple);
 }
 
-body[data-menu-state="open"] .menu-button-line:nth-child(2) {
-  opacity: 0;
+body[data-mode="experiment"] [data-chrome-theme="light"] .menu-button {
+  color: var(--ink);
 }
 
-body[data-menu-state="open"] .menu-button-line:nth-child(3) {
-  transform: translateY(calc(-1 * (var(--menu-line-height) + var(--menu-line-gap)))) rotate(-45deg);
+.menu-button:hover,
+body[data-mode="experiment"] .menu-button:hover {
+  color: var(--accent);
 }
 
-.menu-scrim {
-  position: fixed;
-  inset: 0;
-  z-index: 45;
-  background: rgba(7, 12, 18, 0.42);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 180ms ease;
+body[data-menu-state="open"] {
+  overflow: hidden;
 }
 
 .site-drawer {
+  /* The surface matches the page; the fixed burger sits outside its animation. */
+  --accent: var(--nav-accent);
   position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + 4.85rem);
-  right: calc(env(safe-area-inset-right, 0px) + var(--shell-gap));
-  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--shell-gap));
-  left: auto;
-  z-index: 50;
-  width: min(24rem, calc(100vw - 1.2rem));
-  padding: 1rem 1.1rem 1.35rem;
-  overflow-y: auto;
-  background: var(--drawer);
-  color: var(--drawer-ink);
-  border: 1px solid var(--drawer-line);
-  backdrop-filter: blur(18px);
-  /* Clear the full right inset, then hide the closed drawer after its slide. */
-  transform: translateX(calc(100% + env(safe-area-inset-right, 0px) + var(--shell-gap)));
-  visibility: hidden;
-  pointer-events: none;
-  transition: transform 220ms ease, visibility 0s linear 220ms;
-}
-
-body[data-menu-state="open"] .menu-scrim {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-body[data-menu-state="open"] .site-drawer {
-  transform: translateX(0);
-  visibility: visible;
-  pointer-events: auto;
-  transition-delay: 0s;
-}
-
-.drawer-header,
-.drawer-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.drawer-header {
-  gap: 1rem;
-}
-
-.drawer-heading {
+  inset: 0 0 0 auto;
+  width: min(22rem, 100vw);
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
   margin: 0;
-  color: var(--drawer-muted);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  color: var(--nav-ink);
 }
 
-.drawer-close,
-.drawer-nav-link,
-.drawer-button {
-  transition: color 180ms ease;
+.drawer-surface {
+  height: 100%;
+  padding:
+    calc(env(safe-area-inset-top, 0px) + 4.75rem)
+    0
+    calc(env(safe-area-inset-bottom, 0px) + 1.5rem)
+    0;
+  overflow: hidden;
 }
 
-.drawer-close,
-.drawer-nav-link,
-.drawer-nav-current {
-  font-size: 0.95rem;
+/* One outlined glass frame stays in place while its contents scroll or change. */
+.drawer-surface,
+.experiment-controls-shell,
+.kaleidoscope-toolbar {
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-outline);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
 }
 
-.drawer-close {
-  cursor: pointer;
-  color: var(--drawer-soft);
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .drawer-surface,
+  .experiment-controls-shell,
+  .kaleidoscope-toolbar {
+    background: var(--glass-fallback);
+  }
+}
+
+.site-drawer::backdrop {
+  background: rgba(16, 16, 16, 0.12);
+  animation: menu-backdrop-in 240ms ease both;
+}
+
+.site-drawer[data-phase="closing"]::backdrop {
+  animation: menu-backdrop-out 240ms ease both;
+}
+
+@keyframes menu-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes menu-backdrop-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.site-drawer .menu-button,
+body[data-mode="experiment"] .site-drawer .menu-button {
+  position: fixed;
+  z-index: 1;
+  top: calc(env(safe-area-inset-top, 0px) + 1rem);
+  right: calc(env(safe-area-inset-right, 0px) + var(--shell-gap));
+  color: var(--nav-ink);
+}
+
+.site-drawer .menu-button:hover,
+body[data-mode="experiment"] .site-drawer .menu-button:hover {
+  color: var(--accent);
 }
 
 .drawer-body {
-  padding-top: 1.15rem;
+  height: 100%;
+  overflow-y: auto;
+  /* Keep the divider inset and aligned with the menu's text column. */
+  padding: 0 calc(env(safe-area-inset-right, 0px) + 1.5rem) 0 1.5rem;
 }
 
-.drawer-nav {
-  justify-content: flex-start;
-  gap: 1rem;
-  flex-wrap: wrap;
+.drawer-nav,
+.drawer-experiments {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
 }
 
-.drawer-nav-link {
-  color: var(--drawer-soft);
+.drawer-experiments {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--nav-line);
 }
 
-.drawer-nav-current {
-  color: var(--drawer-ink);
+.drawer-nav-link,
+.drawer-experiment-link {
+  display: block;
+  padding: 0.45rem 0;
+  font-size: 1rem;
+  color: var(--nav-soft);
 }
 
-.drawer-section {
+.drawer-nav-link[aria-current="page"],
+.drawer-experiment-link[aria-current="page"] {
+  color: var(--nav-ink);
+}
+
+.drawer-nav-link:hover,
+.drawer-experiment-link:hover {
+  color: var(--accent);
+}
+
+.info-section {
   margin-top: 1.2rem;
   padding-top: 1rem;
   border-top: 1px solid var(--drawer-line);
-}
-
-.drawer-label {
-  margin: 0 0 0.55rem;
-  color: var(--drawer-muted);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
 }
 
 .drawer-title,
 .landing-hero h1,
 .about-main h1,
 .about-section h2,
-.drawer-section h3,
 .markdown-body h2,
 .markdown-body h3,
 .markdown-body h4 {
@@ -305,14 +363,14 @@ body[data-menu-state="open"] .site-drawer {
 
 .drawer-title {
   margin: 0;
-  font-size: clamp(2rem, 7vw, 2.6rem);
-  line-height: 0.96;
+  padding-right: 2rem;
+  font-size: 1.8rem;
+  line-height: 1.1;
 }
 
 .drawer-copy,
 .drawer-meta,
 .drawer-list,
-.drawer-experiment-copy,
 .markdown-body,
 .markdown-body p,
 .markdown-body ul,
@@ -329,11 +387,6 @@ body[data-menu-state="open"] .site-drawer {
   font-size: 0.92rem;
 }
 
-.drawer-section h3 {
-  margin: 0 0 0.65rem;
-  font-size: 1rem;
-}
-
 .drawer-list {
   margin: 0;
   padding-left: 1.1rem;
@@ -343,59 +396,42 @@ body[data-menu-state="open"] .site-drawer {
   margin-top: 0.45rem;
 }
 
-.drawer-details summary {
-  cursor: pointer;
-  list-style: none;
-  font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-  font-size: 1rem;
-}
-
-.drawer-details summary::-webkit-details-marker {
-  display: none;
-}
-
-.drawer-details .markdown-body {
-  margin-top: 0.8rem;
-}
-
-.drawer-actions {
-  display: flex;
+.info-disclosure-trigger {
+  display: inline-flex;
   align-items: center;
-}
-
-.drawer-button {
+  gap: 0.45rem;
   cursor: pointer;
-  color: var(--drawer-ink);
-}
-
-.drawer-experiments {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.drawer-experiment-link {
-  display: block;
-  color: var(--drawer-soft);
+  font-size: 1rem;
+  font-weight: var(--link-weight);
   transition: color 180ms ease;
 }
 
-.drawer-experiment-link.is-active {
-  color: var(--drawer-ink);
+.info-disclosure-trigger svg {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 200ms ease;
 }
 
-.drawer-experiment-title,
-.drawer-experiment-copy {
-  display: block;
+.info-disclosure-trigger[aria-expanded="true"] svg {
+  transform: rotate(180deg);
 }
 
-.drawer-experiment-title {
-  font-size: 1.02rem;
+.info-disclosure-content {
+  overflow: hidden;
 }
 
-.drawer-experiment-copy {
-  margin-top: 0.08rem;
-  font-size: 0.9rem;
+.info-disclosure-inner {
+  padding-top: 0.8rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .landing-main,
@@ -406,7 +442,8 @@ body[data-menu-state="open"] .site-drawer {
 
 .landing-main {
   flex: 1;
-  padding: 6.6rem 0 3rem;
+  /* Keep the intro close to the navigation while clearing its fixed buttons. */
+  padding: calc(env(safe-area-inset-top, 0px) + 4.75rem) 0 2rem;
 }
 
 .about-main {
@@ -425,12 +462,19 @@ body[data-menu-state="open"] .site-drawer {
 .about-lead,
 .about-section p,
 .about-list,
-.inline-note,
-.experiment-card-copy {
+.inline-note {
   color: var(--ink-soft);
 }
 
-.hero-copy,
+.hero-copy {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.hero-copy a {
+  color: var(--ink);
+}
+
 .about-lead {
   margin: 1.15rem 0 0;
   font-size: 1.04rem;
@@ -455,73 +499,134 @@ body[data-menu-state="open"] .site-drawer {
 }
 
 .showroom-section {
-  margin-top: 4.2rem;
+  margin-top: 1.5rem;
 }
 
 .experiments-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
-  margin-top: 1.1rem;
 }
 
 .experiment-card {
-  display: flex;
-  flex-direction: column;
-  min-height: 12rem;
-  padding: 1rem 1rem 1.05rem;
+  /* Full-bleed collection tiles; only the text moves during the reveal. */
+  --card-duration: 200ms;
+  --card-easing: cubic-bezier(0.06, 0.24, 0.44, 1);
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  overflow: hidden;
   border: 1px solid var(--line);
-  background: rgba(255, 249, 239, 0.34);
-  transition:
-    color 180ms ease,
-    border-color 180ms ease,
-    background-color 180ms ease,
-    transform 180ms ease;
+  background: #071019;
+  color: #fff8ef;
+  text-align: center;
 }
 
-.experiment-card:hover {
-  border-color: rgba(216, 177, 30, 0.48);
-  background: rgba(255, 249, 239, 0.58);
-  transform: translateY(-2px);
+.experiment-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(7, 12, 18, 0.6);
+  pointer-events: none;
+}
+
+.experiment-card:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 4px;
 }
 
 .experiment-card-preview {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
   width: 100%;
-  height: 8rem;
-  margin-bottom: 1rem;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
+}
+
+.experiment-card-title,
+.experiment-card-details {
+  grid-area: 1 / 1;
+  width: 100%;
+  transition:
+    opacity var(--card-duration) var(--card-easing),
+    transform var(--card-duration) var(--card-easing);
 }
 
 .experiment-card-title {
   margin: 0;
   font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
   font-size: 1.5rem;
-  line-height: 1;
+  line-height: 1.15;
+}
+
+.experiment-card-details {
+  opacity: 0;
+  transform: translateY(-1rem);
 }
 
 .experiment-card-copy {
-  margin: 0.65rem 0 0;
-  color: var(--ink-soft);
-  font-size: 0.97rem;
+  /* Let the description fill the tile without competing with tag badges. */
+  margin: 0;
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  line-height: 1.4;
 }
 
-.experiment-card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  margin-top: auto;
-  padding-top: 0.9rem;
+/* Keyboard focus reveals the same copy without hiding it from screen readers. */
+.experiment-card:focus-visible .experiment-card-title {
+  opacity: 0;
+  transform: translateY(1rem);
 }
 
-.experiment-tag {
-  padding: 0.24rem 0.46rem;
-  border-radius: 999px;
-  background: rgba(16, 16, 16, 0.9);
-  color: #fff8ef;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.experiment-card:focus-visible .experiment-card-details {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .experiment-card:hover .experiment-card-title {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+
+  .experiment-card:hover .experiment-card-details {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Touch visitors can read the title and description before opening a tile. */
+@media (hover: none), (pointer: coarse) {
+  .experiment-card {
+    align-content: center;
+    gap: 0.85rem;
+  }
+
+  .experiment-card-title,
+  .experiment-card-details {
+    grid-area: auto;
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .experiment-card:focus-visible .experiment-card-title {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .experiment-card-title,
+  .experiment-card-details {
+    transform: none !important;
+    transition: none;
+  }
 }
 
 .about-section {
@@ -601,6 +706,29 @@ body[data-menu-state="open"] .site-drawer {
   z-index: 0;
 }
 
+.experiment-artwork-viewport {
+  /* Measure usable artwork bounds on resize, never inside a draw loop. */
+  position: fixed;
+  inset:
+    var(--experiment-view-top, 0px)
+    calc(env(safe-area-inset-right, 0px) + 16px)
+    var(--experiment-view-bottom, 0px)
+    calc(env(safe-area-inset-left, 0px) + 16px);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.experiment-controls-header {
+  display: contents;
+}
+
+.mobile-controls-title,
+.experiment-controls-header .experiment-controls-close,
+.experiment-quick-actions,
+.info-back-symbol {
+  display: none;
+}
+
 .experiment-controls-shell {
   position: fixed;
   top: calc(env(safe-area-inset-top, 0px) + 4.85rem);
@@ -613,14 +741,74 @@ body[data-menu-state="open"] .site-drawer {
 
 .experiment-controls {
   padding: 0.82rem 0.92rem 0.9rem;
-  background: rgba(7, 12, 18, 0.72);
   color: var(--drawer-ink);
-  border: 1px solid var(--drawer-line);
-  backdrop-filter: blur(12px);
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  color: var(--drawer-ink);
+  transition: color 180ms ease;
+}
+
+.icon-button svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.experiment-info-toggle {
+  position: absolute;
+  top: 0.1rem;
+  right: 0.2rem;
+  z-index: 1;
+}
+
+.experiment-info {
+  /* Use the controls' existing shell so information replaces them in place. */
+  padding: 0.82rem 0.92rem 0.9rem;
+  color: var(--drawer-ink);
+}
+
+.experiment-info-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.experiment-info-actions .drawer-meta {
+  margin: 0;
+}
+
+.copy-link-button {
+  margin-left: -0.6rem;
+}
+
+.copy-link-done,
+.info-close-symbol,
+[aria-expanded="true"] .info-toggle-symbol,
+[data-copy-state="copied"] .copy-link-symbol {
+  display: none;
+}
+
+.copy-link-button[data-copy-state="copied"],
+.experiment-info-toggle[aria-expanded="true"] {
+  color: var(--accent);
+}
+
+[data-copy-state="copied"] .copy-link-done,
+[aria-expanded="true"] .info-close-symbol {
+  display: block;
 }
 
 .control-panel__heading {
   margin: 0 0 0.85rem;
+  padding-right: 2rem;
   color: var(--drawer-muted);
   font-size: 0.78rem;
   font-weight: 700;
@@ -706,8 +894,8 @@ body[data-menu-state="open"] .site-drawer {
 
 .control-button:hover {
   color: var(--accent);
-  border-color: rgba(216, 177, 30, 0.4);
-  background: rgba(216, 177, 30, 0.08);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
 /* Keep matrix columns readable; smaller screens can swipe between full cards. */
@@ -759,8 +947,6 @@ body[data-menu-state="open"] .site-drawer {
 
 .markdown-body a {
   color: var(--drawer-ink);
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
   overflow-wrap: anywhere;
 }
 
@@ -807,11 +993,20 @@ body[data-menu-state="open"] .site-drawer {
   }
 }
 
+@media (max-width: 700px), (pointer: coarse) {
+  .drawer-nav-link,
+  .drawer-experiment-link {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+
 @media (max-width: 700px) {
   .site-home-link,
   .menu-button {
-    width: 2.6rem;
-    height: 2.6rem;
+    width: 2.75rem;
+    height: 2.75rem;
   }
 
   .site-logo {
@@ -819,20 +1014,16 @@ body[data-menu-state="open"] .site-drawer {
     height: 1.8rem;
   }
 
-  .site-drawer {
-    top: calc(env(safe-area-inset-top, 0px) + 4.4rem);
-    width: min(100vw - 0.35rem, 24rem);
-    padding-left: 0.95rem;
-    padding-right: 0.95rem;
+  .landing-main {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 4.4rem);
   }
 
-  .landing-main,
   .about-main {
     padding-top: 5.8rem;
   }
 
   .showroom-section {
-    margin-top: 3rem;
+    margin-top: 1.25rem;
   }
 
   .landing-hero h1,
@@ -861,17 +1052,7 @@ body[data-menu-state="open"] .site-drawer {
 
 /* Choose the phone layout by width; short desktop windows keep their columns. */
 @media (max-width: 520px) {
-  .site-drawer {
-    top: calc(env(safe-area-inset-top, 0px) + 4.15rem);
-    right: calc(env(safe-area-inset-right, 0px) + 0.35rem);
-    width: min(100vw - 0.7rem, 24rem);
-  }
-
-  .drawer-body {
-    padding-top: 1rem;
-  }
-
-  .drawer-section {
+  .info-section {
     margin-top: 1rem;
     padding-top: 0.85rem;
   }
@@ -885,7 +1066,8 @@ body[data-menu-state="open"] .site-drawer {
     max-height: min(17rem, calc(100dvh - env(safe-area-inset-top, 0px) - 5.4rem));
   }
 
-  .experiment-controls {
+  .experiment-controls,
+  .experiment-info {
     padding: 0.72rem 0.8rem 0.8rem;
   }
 
@@ -902,6 +1084,20 @@ body[data-menu-state="open"] .site-drawer {
   }
 }
 
+.experiment-controls-shell[data-info-state="open"] {
+  /* Information can use the available height beyond the phone controls' limit. */
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 6rem);
+}
+
+.experiment-controls-shell[data-info-state="open"] .experiment-info-toggle {
+  /* Keep the return button reachable while scrolling long experiment notes. */
+  position: sticky;
+  display: flex;
+  top: 0.1rem;
+  margin-left: calc(100% - 2.95rem);
+  margin-bottom: -2.75rem;
+}
+
 /* Camera kaleidoscope: keep the view full bleed and its controls compact. */
 body[data-experiment="kaleidoscope"] .experiment-controls-shell {
   inset: auto auto calc(env(safe-area-inset-bottom, 0px) + 0.8rem) 50%;
@@ -910,13 +1106,50 @@ body[data-experiment="kaleidoscope"] .experiment-controls-shell {
   max-width: calc(100% - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 1.4rem);
   max-height: none;
   overflow: visible;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+body[data-experiment="kaleidoscope"] .experiment-info-toggle {
+  position: static;
+}
+
+/* The closed camera toolbar already has its own frame; avoid a second layer. */
+body[data-experiment="kaleidoscope"] .experiment-controls-shell:not([data-info-state="open"]) {
+  background: none;
+  border: 0;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 body[data-experiment="kaleidoscope"] .experiment-controls {
   padding: 0;
-  background: none;
-  border: 0;
-  backdrop-filter: none;
+}
+
+body[data-experiment="kaleidoscope"] .experiment-controls-body {
+  min-width: 0;
+}
+
+body[data-experiment="kaleidoscope"] .experiment-controls-shell:not([data-info-state="open"]) .experiment-info-toggle {
+  order: 1;
+}
+
+body[data-experiment="kaleidoscope"] .experiment-controls-shell[data-info-state="open"] {
+  display: block;
+  width: min(18rem, calc(100vw - (2 * var(--shell-gap))));
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 6rem);
+  overflow-y: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-drawer::backdrop {
+    animation: none;
+  }
+
+  .info-disclosure-trigger svg {
+    transition: none;
+  }
 }
 
 .kaleidoscope-canvas {
@@ -940,10 +1173,8 @@ body[data-experiment="kaleidoscope"] .experiment-controls {
   justify-content: center;
   gap: 0.25rem;
   padding: 0.3rem;
-  color: #f5f5f0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--drawer-ink);
   border-radius: 1rem;
-  background: rgba(7, 12, 18, 0.88);
 }
 
 .kaleidoscope-patterns {
@@ -959,8 +1190,41 @@ body[data-experiment="kaleidoscope"] .experiment-controls {
   cursor: pointer;
 }
 
+/* Keep every camera control directly available, with balanced phone rows. */
+@media (max-width: 600px) {
+  body[data-experiment="kaleidoscope"] .experiment-controls-shell:not([data-info-state="open"]) {
+    width: calc(100% - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 1.4rem);
+    align-items: flex-end;
+  }
+
+  body[data-experiment="kaleidoscope"] .experiment-controls-body {
+    flex: 1;
+  }
+
+  .kaleidoscope-toolbar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 0.3rem;
+  }
+
+  .kaleidoscope-patterns {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.3rem;
+  }
+
+  .kaleidoscope-toolbar button {
+    min-width: 0;
+    padding: 0.5rem 0.4rem;
+    font-size: clamp(0.75rem, 2.8vw, 0.85rem);
+  }
+}
+
+/* White identifies the current pattern; filled accents identify actions. */
 .kaleidoscope-patterns button[aria-pressed="true"] {
-  background: #f5f0e6;
+  background: var(--paper);
   color: #101820;
 }
 
@@ -969,8 +1233,20 @@ body[data-experiment="kaleidoscope"] .experiment-controls {
 }
 
 .kaleidoscope-capture {
-  background: #9adbc5;
+  background: var(--accent);
   color: #101820;
+}
+
+/* Keep camera and photo actions on the shared logo accent. */
+.kaleidoscope-patterns button:not([aria-pressed="true"]):hover,
+.kaleidoscope-flip:hover,
+.kaleidoscope-photo-button:not([data-photo-download]):not(:disabled):hover {
+  color: var(--accent);
+}
+
+.kaleidoscope-flip:hover,
+.kaleidoscope-photo-button:not([data-photo-download]):not(:disabled):hover {
+  border-color: var(--accent);
 }
 
 .kaleidoscope-toolbar button:focus-visible,
@@ -1030,7 +1306,7 @@ body[data-experiment="kaleidoscope"] .experiment-controls {
   min-height: 48px;
   padding: 0.7rem 1.2rem;
   border-radius: 0.7rem;
-  background: #f5f0e6;
+  background: var(--accent);
   color: #101820;
   cursor: pointer;
 }
@@ -1152,7 +1428,7 @@ body[data-experiment="kaleidoscope"] .experiment-controls {
 }
 
 .kaleidoscope-photo-button[data-photo-download] {
-  background: #9adbc5;
+  background: var(--accent);
   color: #101820;
   border-color: transparent;
 }
@@ -1184,5 +1460,243 @@ body[data-experiment="kaleidoscope"] .experiment-controls {
 .kaleidoscope-hint[hidden],
 .kaleidoscope-frame[hidden],
 .kaleidoscope-photo [hidden] {
+  display: none;
+}
+
+/* Phone controls are opt-in: the artwork stays clear until Controls is tapped.
+   experimentControls.js also selects this layout for landscape phones. */
+body[data-controls-layout="mobile"] .experiment-page {
+  --experiment-view-top: calc(env(safe-area-inset-top, 0px) + 4.5rem);
+  --experiment-view-bottom: calc(env(safe-area-inset-bottom, 0px) + 5rem);
+}
+
+.mobile-controls-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  color: var(--drawer-ink);
+}
+
+.mobile-controls-dialog::backdrop {
+  background: transparent;
+}
+
+body[data-controls-layout="mobile"] .mobile-controls-dialog .experiment-controls-shell {
+  position: absolute;
+  inset: 0;
+  transform: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  overflow: hidden;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-outline);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+}
+
+body[data-controls-layout="mobile"] .experiment-controls-header {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0.25rem;
+  margin:
+    0
+    calc(env(safe-area-inset-right, 0px) + 1.1rem)
+    0
+    calc(env(safe-area-inset-left, 0px) + 1.1rem);
+  padding: calc(env(safe-area-inset-top, 0px) + 0.6rem) 0 0.6rem;
+  border-bottom: 1px solid var(--drawer-line);
+}
+
+body[data-controls-layout="mobile"] .mobile-controls-title {
+  display: block;
+  flex: 1;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.info-view-label,
+[data-info-state="open"] .controls-view-label {
+  display: none;
+}
+
+[data-info-state="open"] .info-view-label {
+  display: inline;
+}
+
+body[data-controls-layout="mobile"] .experiment-controls-close,
+body[data-controls-layout="mobile"] .experiment-controls-header .experiment-info-toggle {
+  position: static;
+  display: inline-flex;
+  margin: 0;
+}
+
+body[data-controls-layout="mobile"] .experiment-info-toggle[aria-expanded="true"] .info-close-symbol {
+  display: none;
+}
+
+body[data-controls-layout="mobile"] .experiment-info-toggle[aria-expanded="true"] .info-back-symbol {
+  display: block;
+}
+
+body[data-controls-layout="mobile"] .experiment-controls-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+body[data-controls-layout="mobile"] .experiment-controls,
+body[data-controls-layout="mobile"] .experiment-info {
+  width: 100%;
+  max-width: 38rem;
+  margin: 0 auto;
+  padding:
+    1.1rem
+    calc(env(safe-area-inset-right, 0px) + 1.1rem)
+    1.1rem
+    calc(env(safe-area-inset-left, 0px) + 1.1rem);
+}
+
+body[data-controls-layout="mobile"] .control-panel__heading {
+  display: none;
+}
+
+body[data-controls-layout="mobile"] .control-range {
+  min-height: 2rem;
+}
+
+body[data-controls-layout="mobile"] .control-button,
+body[data-controls-layout="mobile"] .control-checkbox label {
+  min-height: 44px;
+  font-size: 0.95rem;
+}
+
+body[data-controls-layout="mobile"] .control-checkbox label {
+  display: flex;
+  align-items: center;
+}
+
+body[data-controls-layout="mobile"] .control-checkbox input {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+body[data-controls-layout="mobile"] .control-label {
+  font-size: 0.8rem;
+}
+
+body[data-controls-layout="mobile"] .info-disclosure-trigger {
+  min-height: 44px;
+}
+
+body[data-controls-layout="mobile"] .experiment-quick-actions {
+  position: fixed;
+  z-index: 20;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+  left: calc(env(safe-area-inset-left, 0px) + var(--shell-gap));
+  right: calc(env(safe-area-inset-right, 0px) + var(--shell-gap));
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.experiment-controls-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.7rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.experiment-controls-open {
+  color: var(--drawer-ink);
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-outline);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+}
+
+.experiment-controls-open svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.experiment-controls-open:hover {
+  color: var(--accent);
+}
+
+.experiment-controls-open:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+body[data-controls-layout="mobile"] .kaleidoscope-toolbar {
+  padding: 0;
+  border: 0;
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+body[data-controls-layout="mobile"] .kaleidoscope-patterns {
+  width: 100%;
+  gap: 0.5rem;
+}
+
+body[data-controls-layout="mobile"] .kaleidoscope-patterns button {
+  flex: 1;
+}
+
+body[data-controls-layout="mobile"] .kaleidoscope-flip {
+  flex: 1;
+  margin-top: 0.75rem;
+}
+
+body[data-controls-layout="mobile"] .rotation-matrices {
+  left: calc(env(safe-area-inset-left, 0px) + 16px);
+  bottom: var(--experiment-view-bottom);
+}
+
+@media (min-aspect-ratio: 1/1) {
+  body[data-controls-layout="mobile"] .rotation-matrices {
+    top: var(--experiment-view-top);
+    left: auto;
+    width: min(43vw, 26rem);
+    overflow-y: auto;
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  body[data-controls-layout="mobile"] .mobile-controls-dialog .experiment-controls-shell,
+  .experiment-controls-open {
+    background: var(--glass-fallback);
+  }
+}
+
+body .experiment-quick-actions[hidden],
+.experiment-quick-actions [hidden] {
   display: none;
 }
