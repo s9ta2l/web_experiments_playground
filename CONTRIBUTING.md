@@ -69,17 +69,31 @@ To verify buttons, open Rotations and Tab to Pause. Enter should change its labe
 
 ## Menu accessibility
 
-The menu is a modal dialog. Opening it moves focus to Close and makes the background inert. Tab and Shift+Tab cycle through the visible drawer controls, including expanded Notes. Escape, Close, and the backdrop return focus to the menu button; the closed drawer is inert and fully hidden.
+The menu is a modal dialog. Its hamburger stays visible and focused inside the open panel while the background is inert. Tab and Shift+Tab cycle through Gallery, About, and the experiment titles. Escape, the hamburger, and the backdrop close the panel and return focus to the menu button; the closed menu is fully hidden.
 
-To verify, Tab around a page with the menu closed: no offscreen menu controls should receive focus. Open the menu with Enter, cycle forward and backward through it, then press Escape. Focus should return to Open menu, and the page controls should work again. Repeat on the showroom, About, and an experiment page, and check both Close and backdrop clicks.
+To verify, Tab around a page with the menu closed: no offscreen menu controls should receive focus. Open the menu with Enter, cycle forward and backward through it, then press Escape. Focus should return to Open menu, and the page controls should work again. Repeat on Gallery, About, and light/dark experiment pages, and check both hamburger and backdrop clicks.
 
-The menu button shows three vertically stacked bars when closed and a centered cross when open. Check both states on desktop and phone widths, including with a larger browser font size.
+The menu button keeps three vertically stacked bars in both states. The surface slides in its matching light or dark theme while the burger stays fixed. Check desktop and phone widths, including with a larger browser font size and reduced motion enabled.
+
+## Experiment information
+
+The shared info button sits outside the experiment’s controls mount. It switches between controls and information in the same shell without remounting the controls. Instructions and Notes are independent, initially collapsed disclosures with accessible expanded state and chevrons. The copy-link icon below the description has a tooltip and announces its result. On desktop, information is not modal, so the canvas remains available; its close icon and Escape restore the controls and focus.
+
+To verify, change a slider, open information, expand and collapse both sections, copy the link, then return to the controls: the slider value should remain unchanged. Repeat with Camera Kaleidoscope’s bottom toolbar. The animations should be immediate with reduced motion enabled.
+
+## Phone controls
+
+`src/app/experimentControls.js` moves the existing controls shell into a native modal dialog on narrow screens and landscape phones. The closed dialog leaves the artwork unobstructed; Controls opens a full-screen glass surface. Its header stays visible while the body scrolls. Info switches within the panel, with a back arrow to controls and a separate close button returning to the artwork. Escape backs out of information first, then closes the panel. Closing returns focus to Controls; reopening starts with controls and preserves their values. Widening to desktop restores the same shell to its original position.
+
+Kaleidoscope sets `directControls` on the shared controller: all its controls stay in a responsive bottom toolbar without a Controls opener. Narrow screens use three equally sized pattern choices above equally sized Flip camera and Capture photo buttons. Info opens the phone dialog directly; closing or going back restores the toolbar with its selected pattern intact. Desktop keeps the in-place information switch. Pendulum and Rotation Matrices fit their artwork within the remaining space around navigation, quick actions, and matrices. These bounds are measured on layout changes, outside draw loops.
+
+To verify, open every experiment at 320×568, 390×844, and 844×390 with touch enabled. Check that settings panels start closed, the artwork is visible, sliders and buttons respond to taps, long controls and Notes scroll without losing the close button, and settings survive Info, closing, and rotation. For Kaleidoscope, check that all toolbar buttons are directly available with no Controls opener, their widths fit, and pattern selection, camera flip, Info, capture, and retake work. Check Tab focus and Escape inside the modal, reduced motion, and a resize back to desktop. Home, About, and the right menu should fit these widths too.
 
 ## Experiment Notes
 
 Notes render the README's headings (levels 1–3), paragraphs, bullet and numbered lists, bold text, inline code, fenced code, and inline links. Web, mail, and relative links are supported; raw HTML is shown as text. This is a small renderer for these features rather than a full Markdown implementation.
 
-To verify, open Camera Kaleidoscope's menu and expand Notes. Pattern names should be bold, verification steps should be a ten-item numbered list, reference links should be underlined and reachable with Tab, and code should stay literal. Run `npm test` for the Markdown renderer checks.
+To verify, open Camera Kaleidoscope's information and expand Notes. Pattern names should be bold, verification steps should be a ten-item numbered list, reference links should be slightly bold without underlines and reachable with Tab, and code should stay literal. Run `npm test` for the Markdown renderer checks.
 
 ## Naming conventions
 

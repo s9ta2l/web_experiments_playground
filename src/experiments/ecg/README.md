@@ -1,4 +1,4 @@
-# Synthetic ECG
+# ECG
 
 ## What it is
 

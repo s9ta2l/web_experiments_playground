@@ -71,9 +71,9 @@ export function startChaosPendulumExperiment({
       viewport.addClass("pendulum-viewport");
       Object.assign(viewport.elt.style, {
         position: "fixed",
-        top: `calc(env(safe-area-inset-top, 0px) + ${VIEW_GAP}px)`,
+        top: `var(--experiment-view-top, calc(env(safe-area-inset-top, 0px) + ${VIEW_GAP}px))`,
         right: `calc(env(safe-area-inset-right, 0px) + ${VIEW_GAP}px)`,
-        bottom: `calc(env(safe-area-inset-bottom, 0px) + ${VIEW_GAP}px)`,
+        bottom: `var(--experiment-view-bottom, calc(env(safe-area-inset-bottom, 0px) + ${VIEW_GAP}px))`,
         left: `calc(env(safe-area-inset-left, 0px) + ${VIEW_GAP}px)`,
         visibility: "hidden",
         pointerEvents: "none",
@@ -124,7 +124,7 @@ export function startChaosPendulumExperiment({
       let top = bounds.top;
       let width = bounds.width;
       let height = bounds.height;
-      if (controlsShell) {
+      if (controlsShell && document.body.dataset.controlsLayout !== "mobile") {
         const controls = controlsShell.getBoundingClientRect();
         const besideLeft = Math.max(bounds.left, controls.right + VIEW_GAP);
         const belowTop = Math.max(bounds.top, controls.bottom + VIEW_GAP);

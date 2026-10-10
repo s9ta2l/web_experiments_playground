@@ -1,4 +1,4 @@
-# Art / Code Wake
+# Cursor Trails
 
 ## What it is
 

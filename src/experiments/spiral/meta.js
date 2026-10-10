@@ -3,10 +3,10 @@ import previewUrl from "./preview.svg";
 
 export const meta = {
   id: "spiral",
-  title: "Orbital Spiral",
+  chromeTheme: "light",
+  title: "Archimedean Spiral",
   description: "An Archimedean spiral study with controls for turn count, spacing, spin, orbit offset, and trails.",
   authors: [],
-  status: "Open for collaboration",
   mode: "interactive",
   themes: ["geometry", "orbit"],
   controls: [

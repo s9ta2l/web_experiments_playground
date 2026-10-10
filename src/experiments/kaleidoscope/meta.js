@@ -6,7 +6,6 @@ export const meta = {
   title: "Camera Kaleidoscope",
   description: "Turn the world around you into a live field of mirrors. Explore three classic patterns and capture a portrait photo ready for your Story.",
   authors: [],
-  status: "Open for collaboration",
   mode: "interactive",
   themes: ["camera", "mirrors", "geometry"],
   controls: [

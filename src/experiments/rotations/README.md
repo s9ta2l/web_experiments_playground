@@ -1,4 +1,4 @@
-# Rotation Matrices in 3D
+# Rotation Matrices
 
 ## What it is
 

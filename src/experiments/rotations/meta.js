@@ -3,11 +3,11 @@ import previewUrl from "./preview.svg";
 
 export const meta = {
   id: "rotations",
-  title: "Rotation Matrices in 3D",
+  chromeTheme: "light",
+  title: "Rotation Matrices",
   description:
     "Three wireframe cubes — one per axis — rotating via their own 3×3 matrix, with the matrix shown live beside each.",
   authors: [],
-  status: "Open for collaboration",
   mode: "interactive",
   themes: ["math", "3d", "education"],
   controls: [

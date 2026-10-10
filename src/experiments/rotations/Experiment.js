@@ -58,6 +58,7 @@ export function startRotationsExperiment({
     let cards;
     let matrixContainer;
     let controlsShell;
+    let artworkViewport;
     let stripOffset = 0;
     let viewCenterX = 0;
     let viewCenterY = 0;
@@ -70,6 +71,7 @@ export function startRotationsExperiment({
 
       const panel = createControlPanel(p, controlsMountId);
       controlsShell = panel.elt.closest(".experiment-controls-shell");
+      artworkViewport = document.querySelector(".experiment-artwork-viewport");
       controlsShell?.classList.add("rotations-controls-shell");
 
       timelineControl = addSliderControl(p, panel, {
@@ -123,6 +125,7 @@ export function startRotationsExperiment({
       layoutObserver = new ResizeObserver(computeSizes);
       layoutObserver.observe(matrixContainer.elt);
       if (controlsShell) layoutObserver.observe(controlsShell);
+      if (artworkViewport) layoutObserver.observe(artworkViewport);
     };
 
     p.draw = () => {
@@ -211,7 +214,15 @@ export function startRotationsExperiment({
       let top = 0;
       let width = p.width;
       let height = p.height;
-      if (matrixContainer && controlsShell) {
+      if (matrixContainer && artworkViewport && document.body.dataset.controlsLayout === "mobile") {
+        // Fit cubes around the readable matrices and the small Controls button.
+        const bounds = artworkViewport.getBoundingClientRect();
+        const matrices = matrixContainer.elt.getBoundingClientRect();
+        left = bounds.left;
+        top = bounds.top;
+        width = p.width > p.height ? matrices.left - left - LAYOUT_GAP : bounds.width;
+        height = p.width > p.height ? bounds.height : matrices.top - top - LAYOUT_GAP;
+      } else if (matrixContainer && controlsShell) {
         const matrices = matrixContainer.elt.getBoundingClientRect();
         const controls = controlsShell.getBoundingClientRect();
         if (matrices.left > controls.right) {

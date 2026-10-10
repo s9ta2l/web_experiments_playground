@@ -6,7 +6,6 @@ export const meta = {
   title: "Bouncing Triangle",
   description: "Outlined triangles spinning and bouncing across the viewport — with optional trails and pair-wise collisions when more than one is on screen.",
   authors: [],
-  status: "Open for collaboration",
   mode: "interactive",
   themes: ["geometry", "motion"],
   controls: [

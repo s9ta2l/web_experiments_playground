@@ -25,6 +25,8 @@ export function startECGExperiment({
     let scaleControl;
     let speedControl;
     let bpmControl;
+    let compactOverlay = false;
+    let overlayY = 64;
 
     p.setup = () => {
       p.createCanvas(p.windowWidth, p.windowHeight).parent(mountId);
@@ -74,6 +76,7 @@ export function startECGExperiment({
       });
 
       p.background(0);
+      updateOverlayLayout();
     };
 
     p.draw = () => {
@@ -109,9 +112,11 @@ export function startECGExperiment({
       p.noStroke();
       p.fill(180);
       p.textSize(p.width < 520 ? 12 : 14);
-      const overlay = `ECG demo  |  bpm=${bpm}  |  speed=${speed}  |  scale=${scaleY}`;
+      const overlay = compactOverlay
+        ? `bpm ${bpm} · speed ${speed} · scale ${scaleY}`
+        : `ECG demo  |  bpm=${bpm}  |  speed=${speed}  |  scale=${scaleY}`;
       const textX = Math.max(margin, p.width - margin - p.textWidth(overlay));
-      p.text(overlay, textX, margin + 24);
+      p.text(overlay, textX, overlayY);
     };
 
     p.keyPressed = (event) => {
@@ -153,7 +158,16 @@ export function startECGExperiment({
 
     p.windowResized = () => {
       p.resizeCanvas(p.windowWidth, p.windowHeight);
+      updateOverlayLayout();
     };
+
+    function updateOverlayLayout() {
+      compactOverlay = document.body.dataset.controlsLayout === "mobile";
+      const viewport = document.querySelector(".experiment-artwork-viewport");
+      overlayY = compactOverlay && viewport
+        ? viewport.getBoundingClientRect().top + 14
+        : (p.width < 520 ? 18 : 40) + 24;
+    }
 
     function regenerateBpm() {
       bpm = Math.floor(50 + Math.random() * 40);

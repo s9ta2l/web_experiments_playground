@@ -112,6 +112,7 @@ export function startKaleidoscopeExperiment({
     sketch?.noLoop();
     gate.hidden = false;
     toolbar.hidden = true;
+    captureButton.hidden = true;
     hint.hidden = true;
     frameGuide.hidden = true;
     title.textContent = heading;
@@ -176,6 +177,7 @@ export function startKaleidoscopeExperiment({
       state = "live";
       gate.hidden = true;
       toolbar.hidden = false;
+      captureButton.hidden = false;
       hint.hidden = hasTurned;
       frameGuide.hidden = false;
       flipButton.setAttribute("aria-label", facing === "user" ? "Use rear camera" : "Use front camera");
@@ -388,6 +390,7 @@ export function startKaleidoscopeExperiment({
     gate.remove();
     hint.remove();
     frameGuide.remove();
+    captureButton.remove();
     controls.replaceChildren();
   }
   if (import.meta.hot) import.meta.hot.dispose(destroy);
